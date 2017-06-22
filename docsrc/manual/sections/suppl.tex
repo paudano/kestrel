@@ -1,0 +1,170 @@
+% Copyright (c) 2017 Peter A. Audano III
+% GNU Free Documentation License Version 1.3 or later
+% See the file COPYING.DOC for copying conditions.
+
+\section{Supplementary Information}
+\label{sec.suppl}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Input File Formats %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Input File Formats}
+\label{sec.suppl.fileformats}
+
+%%% FASTA %%%
+\subsubsection{FASTA}
+\label{sec.suppl.fileformats.fasta}
+
+FASTA files are compatible with the FASTA format acceptable by NCBI BLAST\footnote{http://www.ncbi.nlm.nih.gov/BLAST/blastcgihelp.shtml}. The only exception is that the reader permits blank lines within the sequence because all blank lines are ignored by the parser.
+
+A single-line description beginning with '>' precedes each sequence record. The sequence record may be on a single line or split over any number of lines. There are no restrictions on the line length.
+
+FASTA files are not checked by the reader. The sequence string may contain any characters as long a line does not begin with '>'. The k-mer component that translates sequences skips over all unrecognized characters. Checking sequences while reading is omitted for performance reasons.
+
+Standard line break characters are recognized: LF (Linux/Unix/MacOS), or CRLF (Windows). The file may or may not end with a newline character.
+
+%%% FASTAGZ %%%
+\subsubsection{FASTAGZ}
+\label{sec.supl.fileformats.fastagz}
+
+A GZIP compressed FASTA file. The uncompressed file contents must follow the FASTA format defined in Section~\ref{sec.suppl.fileformats.fasta}.
+
+%%% FASTQ %%%
+\subsubsection{FASTQ}
+\label{sec.suppl.fileformats.fastq}
+
+FASTQ files must be compatible with the format published in Nucleic Acid Reseach\footnote{http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2847217/}. The first line of a record begins with '@'. The sequence may be split over multiple lines. A line beginning with '+' will separate the sequence from the quality scores. Quality scores are read line-by-line until the number of quality score characters is the same as the number of sequence characters read for any given record. The quality score characters are discarded (this reader does not enforce proper scores).
+
+This reader permits blank lines between records, but not within records.
+
+Standard line break characters are recognized: LF (Linux/Unix/MacOS), or CRLF (Windows). The file may or may not end with a newline character.
+
+%%% FASTQGZ %%%
+\subsubsection{FASTQGZ}
+\label{sec.supl.fileformats.fastqgz}
+
+A GZIP compressed FASTQ file. The uncompressed file contents must follow the FASTQ format defined in Section~\ref{sec.suppl.fileformats.fastq}.
+
+%%% RAW %%%
+\subsubsection{RAW}
+\label{sec.suppl.fileformats.raw}
+
+Raw sequence files are the simplest record type. A sequence may be split over any number of lines. Blank lines separate records.
+
+Standard line break characters are recognized: LF (Linux/Unix/MacOS), or CRLF (Windows). The file may or may not end with a newline character.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Kmer Output Formats %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Kmer Output Formats}
+\label{sec.suppl.outputformat}
+
+K-mers may be output in one of several formats. The most natural is the sequence format, which a sequence of k bases, each A, C, T, or G. Note that if RNA sequences are read, U is converted to T on output. This is because T and U are represented the same internally.
+
+Two other representations, decimal and hexadecimal, take a little more explanation. Internally, k-mers are represented as integers. Converting the sequences to integers makes processing and storing the k-mers fast and efficient.
+
+To understand the k-mer nucletide sequence to integer conversion, the nucleotide sequence can be thought of a base-4 numbering system where A is 0, C is 1, G is 2, and T is 3. Each base can be conveniently represented as a two-bit number where A = 00, C = 01, G = 10, and T = 11. A k-mer sequence is then a sequence of these letters. For example, the 8-mer CCAGTCGT is 0101001011011011.
+
+Note that k-mers are given a natural order where lower numbers come before higher numbers. For 8-mers, the first possible k-mer is AAAAAAAA, and the last possible k-mer is TTTTTTTT. This numeric ordering can be taken advantage of in many ways.
+
+Java's long integer is a 64-bit 2's complement integer. Each k-mer is is two bits in length. In order to preserve the natural ordering, we chose not to include negative numbers, which is any 2's complement integer that begins with 1. Excluding the first bit, which is always 0, a 64-bit integer can represent any k-mer size 1 to 31. Therefore, the maximum k-mer size is currently 31.
+
+Binary numbers are conveniently represented in hexadecimal. K-mers can also be written as hexadecimal integers, which affords them a compact representation. For example, the same 8-mer as above, CCAGTCGT, can be represented as 0x52DB.
+
+The global property, \emph{kanalyze.outfmt}, sets one of the following output options. If the property is not set, the default sequence option is set. For convenience, most modules have a shorter command line option to set this property.
+
+%%% Sequence Format %%%
+\subsubsection{Sequence Format}
+\label{sec.suppl.outputformat.seq}
+
+Tab delimited file of k-mers and counts. K-mers are written as a string of A, C, G, and T. Each k-mer has k letters. Note that if RNA sequences were read, U will be converted to T when sequences are output in this format.
+
+%%% Decimal Format %%%
+\subsubsection{Decimal Format}
+\label{sec.suppl.outputformat.dec}
+
+Tab delimited file of k-mers and counts using the base-10 decimal representation of k-mers. For more information about how k-mer sequences are represented as integers, see the above section~\ref{sec.suppl.outputformat}.
+
+%%% Hexadecimal Format %%%
+\subsubsection{Hexadecimal Format}
+\label{sec.suppl.outputformat.hex}
+
+Tab delimited file of k-mers and counts using the base-16 decimal representation of k-mers. For more information about how k-mer sequences are represented as integers, see the above
+section~\ref{sec.suppl.outputformat}.
+
+%%% FASTA Format %%%
+\subsubsection{FASTA Format}
+\label{sec.suppl.outputformat.fasta}
+
+FASTA representation of k-mers counts. Each FASTA record is a single k-mer and its count. The description line is the k-mer count and the sequence is the k-mer sequence.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Command Line Return Codes %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Command Line Return Codes}
+\label{sec.supl.retcode}
+
+The KAnalyze user interface always returns a well-defined code. When executed from a script environment, this return code can easily be checked to see if KAnalyze completed normally or not. Each return code is defined in this section.
+
+In the following list of return codes, the numeric code is listed. For API users, the constant defined in \texttt{edu.gatech.kanalyze.Constants} is also
+listed.
+
+\begin{description}
+\item[0 (ERR\_NONE)] The program terminated normally. All k-mers were successfully processed without error, or the help option was invoked.
+
+\item[1 (ERR\_USAGE)] Command line arguments were incomplete, improperly formatted, or required arguments were missing.
+
+\item[2 (ERR\_IO)] An I/O (input/output) error occurred reading or writing data. This error is normally returned for file I/O errors.
+
+\item[3 ERR\_SECURITY] A security error, such as permissions denied, occurred.
+
+\item[4 (ERR\_FILENOTFOUND)] A required or specified file was not found.
+
+\item[5 (ERR\_DATAFORMAT)] Data in an input file is improperly formatted. 
+
+\item[6 (ERR\_ANALYSIS)] Some un-recoverable error occurred during analysis.
+
+\item[7 (ERR\_INTERRUPTED)] A program thread was interrupted while it was running. This would normally be returned if the program is terminated before it completes.
+
+\item[98 (ERR\_ABORT)] The program or a process was terminated before it completed. When the action is requested or expected, this should be returned in lieu of ERR\_INTERRUPTED even if interrupting threads was necessary.
+
+\item[99 (ERR\_SYSTEM)] Some serious unrecoverable system error occurred. These errors are almost certainly program bugs. Some other unrecoverable errors, such as running out of memory, could return this code.
+
+\end{description}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Building From Source %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Building From Source}
+\label{sec.suppl.building}
+
+The source is distributed with an Apache Ant build file with multiple targets. To build these, Apache Ant must be installed.
+
+To run a target, enter \texttt{ant <target>}. Multiple targets may be supplied, for example \texttt{ant clean package}.
+
+The most commonly used targets are ``clean'', ``compile'', and ``package''. The clean removes all temporary files. It is not often necessary, but it should be executed before building a package for testing to ensure no artifacts are left behind from previous builds. The compile target compiles the class files and does nothing else. The package target generates the JAR file and distributable packages.
+
+The ``doc.javadoc'' target generates the Javadoc pages from Kestrel source comments. See Section~\ref{sec.suppl.building.javadoc} for more information about these pages. ``doc.manual'' generates this manual as a PDF file.
+
+Other targets are called by the targets described above and are not often called directly.
+
+For a full list of targets and brief descriptions, enter \texttt{ant -projecthelp}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Building Javadoc Pages %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Building Javadoc Pages}
+\label{sec.suppl.building.javadoc}
+
+Javadoc is a very powerful tool for documenting APIs written in Java. Section~\ref{sec.api.doc} introduces the concept and the KAnalyze rules governing these comments.
+
+Javadoc comments begin with ``/**'', and end with ``*/''. In Kestrel, these comments appear before every class, method, and field. The comment starts with a description of what the element does. For methods, it documents parameters and the conditions under which all exceptions are thrown. Full documentation for writing these comments can be found online\footnote{http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html}. 
+
+The ant build system (Section~\ref{sec.suppl.building}) generates web pages from these comments. The ``doc.javadoc'' target builds two sets of pages. One, the API documentation, documents all elements available on the API. This target is intended for developers who are extending or using the API. The other, FULL documentation, documents everything including private members that are not available to the API. This is meant for Kestrel maintenance programmers.
+
+After running the javadoc Ant target, the API documentation can be access by loading ``build/doc/javadoc/api/index.html'' in a browser (relative to the project root). The FULL documentation can be access by loading ``build/doc/javadoc/full/index.html'' in a browser (relative to the project root).

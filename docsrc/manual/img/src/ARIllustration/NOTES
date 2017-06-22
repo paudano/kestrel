@@ -1,0 +1,17 @@
+# R
+library(ggplot2)
+
+df <- read.table("rseq.table", stringsAsFactors=FALSE)
+colnames(df) <- c("kmer", "count")
+df$ord <- 1:nrow(df)
+
+df <-df[-(300:nrow(df)),]  # Shorten for illustration
+
+plotObj <- ggplot(df, aes(ord, count)) +
+	geom_path(aes(color='Actual count'), color='#485255') +
+	xlab('Reference K-mers (in order)') +
+	ylab('K-mer Frequency') +
+	theme(panel.background = element_rect(fill='#dce1e6')) +
+	ggtitle('Active Region Illustration')
+
+ggsave("ARIllustration.eps", plotObj, dev=cairo_ps, height=3.5, width=(3.5 * 1.618), units="in")

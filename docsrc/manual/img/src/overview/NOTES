@@ -1,0 +1,22 @@
+### ActiveRegionIllustration ###
+* See ~/projects/kescases/rand/
+* Using case: Illustration
+
+
+### K-mer Shift ###
+~/skool/PhD/2016_GaPSeminar/img/kestrel/src/KmerShift.xcf
+
+
+### Alignment ###
+
+TTAATATGA----AAGAGTGC
+| | |||||    ||||| ||
+TCAGTATGAGGCCAAGAGAGC
+
+81 - T>C
+83 - A>G
+89 - insGGCC
+94 - T>A
+
+TTAATATGAAAGAGTGC
+CGTGAGAAAGTATAATT

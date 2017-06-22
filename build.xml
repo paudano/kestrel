@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+	Copyright (c) 2017 Peter A. Audano III
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as published
+	by the Free Software Foundation; either version 3 of the License or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful, but
+	WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Library General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public License
+	along with this program; see the file COPYING.LESSER.  If not, see
+	<http://www.gnu.org/licenses/>
+-->
+
+<project name="Kestrel Variant Detector"
+	default="compile"
+	basedir=".">
+	
+	<description>Builds the Kestrel Toolkit</description>
+	
+
+	<!--
+ 		Load local properties. These take precedence over properties set in the build script.
+ 		The repository MUST ignore this file.
+	-->
+	
+ 	<property file=".localbuildprops"/>
+	
+ 	
+ 	<!--
+		Set properties
+ 	-->
+ 	
+	<property name="dir.root" location="."/>
+	
+	<property name="dir.build" location="${dir.root}/build"/>
+	<property name="dir.build.classes" location="${dir.build}/classes"/>
+	<property name="dir.build.kestrel" location="${dir.build.classes}/edu/gatech/kestrel"/>
+	<property name="dir.build.kestrel.img" location="${dir.build.kestrel}/img"/>
+	<property name="dir.build.temp" location="${dir.build}/temp"/>
+	<property name="dir.build.test" location="${dir.build}/test"/>
+	<property name="dir.build.test.report" location="${dir.build.test}/report"/>
+	<property name="dir.build.test.temp" location="${dir.build.test}/temp"/>
+	
+	<property name="dir.dist" location="${dir.root}/dist"/>
+	
+	<property name="dir.doc" location="${dir.build}/doc"/>
+	<property name="dir.doc.javadoc" location="${dir.doc}/javadoc"/>
+	<property name="dir.doc.javadoc.api" location="${dir.doc.javadoc}/api"/>
+	<property name="dir.doc.javadoc.full" location="${dir.doc.javadoc}/full"/>
+	<property name="dir.doc.manual" location="${dir.doc}/manual"/>
+	<property name="dir.docsrc" location="${dir.root}/docsrc"/>
+	<property name="dir.docsrc.manual" location="${dir.docsrc}/manual"/>
+	
+	<property name="dir.files" location="${dir.root}/files"/>
+	<property name="dir.files.img" location="${dir.files}/img"/>
+	<property name="dir.files.launch" location="${dir.files}/launch"/>
+	<property name="dir.files.launch.win" location="${dir.files.launch}/win"/>
+	<property name="dir.files.launch.linux" location="${dir.files.launch}/linux"/>
+	<property name="dir.files.readme" location="${dir.files}/readme"/>
+	<property name="dir.files.test" location="${dir.files}/test"/>
+	
+	<property name="dir.lib" location="${dir.root}/lib"/>
+	<property name="dir.lib.bin" location="${dir.lib}/bin"/>
+	
+	<property name="dir.src" location="${dir.root}/src"/>
+	
+	<property name="resource.root" location="/edu/gatech/kestrel"/>
+	<property name="resource.test" location="${resource.root}/test"/>
+	
+	<property name="build.classpath" value="${dir.build.classes}:${dir.lib}/kanalyze.jar:${dir.lib}/slf4j-api-1.7.12.jar:${dir.lib}/logback-core-1.1.3.jar:${dir.lib}/logback-classic-1.1.3.jar:${dir.lib}/java-getopt-1.0.14.jar:${dir.lib}/commons-lang3-3.4.jar:${dir.lib}/junit-4.11.jar:${dir.lib}/hamcrest-core-1.3.jar:${dir.lib}/xstream-1.4.5.jar:${dir.lib}/launch4j/launch4j.jar"/>
+	
+	<property name="build.java.bootclasspath" location="/usr/lib/jvm/java-1.7.0/jre/lib/rt.jar"/>
+	<property name="build.java.version.source" value="1.7"/>
+	<property name="build.java.version.target" value="${build.java.version.source}"/>
+	
+	<property name="mode.file" value="644"/>
+	<property name="mode.exe" value="755"/>
+	
+		
+	<!--
+		Target: init
+	 -->
+	
+	<target name="init"
+		description="Initialize the repository for building">
+			
+		<mkdir dir="${dir.build}"/>
+		<mkdir dir="${dir.build.temp}"/>
+		<mkdir dir="${dir.build.classes}"/>
+		<mkdir dir="${dir.dist}"/>
+		
+	</target>
+	
+	
+	<!-- 
+		Target: clean
+	 -->
+	
+	<target name="clean"
+				description="Clean compiled, packaged, and temp resources">
+		
+		<delete dir="${dir.build}"/>
+		<delete dir="${dir.dist}"/>
+		<delete dir="${dir.doc}"/>
+		
+	</target>
+	
+	
+	<!--
+		Target: Compile
+	 -->
+	 
+	 <target name="compile"
+ 		description="Compile sources"
+ 		depends="init">
+ 		
+ 		<javac
+			destdir="${dir.build.classes}"
+			classpath="${build.classpath}"
+			srcdir="${dir.src}"
+			source="${build.java.version.source}"
+			target="${build.java.version.target}"
+ 			bootclasspath="${build.java.bootclasspath}"
+ 			debug="true"
+			includeantruntime="false">
+		
+			<include name="**/*.java"/>
+ 			<exclude name="edu/gatech/kestrel/test/**"/>
+			
+		</javac>
+	 	
+	 	<antcall target="copyresources"/>
+ 		
+	</target>
+	
+	
+	<!--
+		Target: Copy resources
+	-->
+	
+	<target name="copyresources"
+		description="Copy non-class resources to the build directory"
+		depends="init">
+		
+		<mkdir dir="${dir.build.kestrel.img}"/>
+		
+		<!--
+		<copy todir="${dir.build.kestrel.img}">
+			<fileset dir="${dir.files.img}">
+				<include name="**/*.png"/>
+			</fileset>
+		</copy>
+		-->
+		
+	</target>
+	
+	
+	<!--
+		Target: compile.test
+	-->
+	
+	<target name="compile.test"
+		description="Compile test programs"
+		depends="compile">
+	
+		<javac
+			destdir="${dir.build.classes}"
+			classpath="${build.classpath}"
+			srcdir="${dir.src}"
+			source="${build.java.version.source}"
+			target="${build.java.version.target}"
+			bootclasspath="${build.java.bootclasspath}"
+			includeantruntime="false">
+	
+			<include name="edu/gatech/kestrel/test/**/*.java"/>
+		</javac>
+		
+		<copy todir="${dir.build.classes}${resource.test}">
+			<fileset dir="${dir.src}${resource.test}">
+				<include name="**"/>
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+	
+	</target>
+		
+	
+	<!--
+		Target: Package
+	-->
+	
+	<target name="package"
+		description="Package for distribution">
+		
+		<antcall target="package.jar"/>
+		<antcall target="package.targz"/>
+	</target>
+	
+	
+	<!--
+		Target: Package JAR files
+	-->
+	
+	<target name="package.jar"
+		description="Package Kestrel JAR file"
+		depends="compile">
+		
+		<jar destfile="${dir.build}/kestrel.jar">
+			<fileset dir="${dir.build.classes}">
+				<include name="edu/gatech/kestrel/**/*.class"/>
+				<include name="edu/gatech/kestrel/**/*.png"/>
+				<exclude name="edu/gatech/kestrel/test/**/*"/>
+			</fileset>
+			
+			<manifest>
+				<attribute name="Main-Class" value="edu.gatech.kestrel.clui.Main"/>
+				<attribute name="Class-Path" value="kanalyze.jar slf4j-api-1.7.12.jar logback-core-1.1.3.jar logback-classic-1.1.3.jar java-getopt-1.0.14.jar commons-lang3-3.4.jar"/>
+			</manifest>
+		</jar>
+		
+	</target>
+	
+	
+	<!--
+		Target: Package TAR/GZ files (Linux Package)
+	-->
+	
+	<target name="package.targz"
+		description="Package tar.gz files"
+		depends="package.jar,doc.manual,getversion">
+		
+		<tar destfile="${dir.dist}/kestrel-${kestrel.version}-linux.tar.gz"
+			compression="gzip">
+			
+			<tarfileset dir="${dir.build}"
+				filemode="${mode.file}"
+				prefix="${packageroot}">
+				
+				<include name="kestrel.jar"/>
+			</tarfileset>
+			
+			<tarfileset dir="${dir.lib}"
+				filemode="${mode.file}"
+				prefix="${packageroot}">
+				
+				<include name="kanalyze.jar"/>
+				<include name="slf4j-api-1.7.12.jar"/>
+				<include name="logback-core-1.1.3.jar"/>
+				<include name="logback-classic-1.1.3.jar"/>
+				<include name="java-getopt-1.0.14.jar"/>
+				<include name="commons-lang3-3.4.jar"/>
+			</tarfileset>
+			
+			<tarfileset dir="${dir.doc.manual}"
+				filemode="${mode.file}"
+				prefix="${packageroot}">
+				
+				<include name="KestrelManual.pdf"/>
+			</tarfileset>
+			
+			<tarfileset dir="${dir.root}"
+				filemode="${mode.file}"
+				prefix="${packageroot}">
+				
+				<include name="COPYING"/>
+				<include name="COPYING.LESSER"/>
+				<include name="COPYING.DOC"/>
+				<include name="ReleaseNotes"/>
+			</tarfileset>
+			
+			<tarfileset dir="${dir.files.launch.linux}"
+				filemode="${mode.exe}"
+				prefix="${packageroot}">
+				
+			    <include name="kestrel"/>
+				<include name="cite"/>
+			</tarfileset>
+			
+			<tarfileset dir="${dir.files.readme}"
+				filemode="${mode.file}"
+				prefix="${packageroot}">
+				
+				<include name="README"/>
+				
+			</tarfileset>
+			
+		</tar>
+		
+	</target>
+	
+
+	<!--
+		Target: Create all documentation
+	-->
+	<target name="doc"
+		description="Generate all javadoc and Kestrel manual content.">
+		<antcall target="doc.manual"/>
+		<antcall target="doc.javadoc"/>
+	</target>
+
+	
+	<!--
+		Target: Create javadoc documentation
+	-->
+	<target name="doc.javadoc"
+		description="Generate javadoc webpage content.">
+		
+		<antcall target="doc.javadoc.api"/>
+		<antcall target="doc.javadoc.full"/>
+	</target>
+				
+	<!--
+		Target: Software Manual
+	-->
+	<target name="doc.manual"
+		description="Create full documentation (software manual)">
+
+		<mkdir dir="${dir.doc.manual}"/>
+		
+		<!-- First LaTeX Run -->
+		<exec executable="latex"
+			dir="${dir.docsrc.manual}"
+			output="${dir.doc.manual}/latex1.out"
+			failonerror="true">
+
+			<arg value="-output-directory"/>
+			<arg file="${dir.doc.manual}"/>
+			<arg file="${dir.docsrc.manual}/main.tex"/>
+			
+			<env key="TEXINPUTS" value="${dir.doc.manual}:${dir.docsrc.manual}:"/>
+		</exec>
+		
+		<!-- Bibtex -->
+		<exec executable="bibtex"
+			dir="${dir.docsrc.manual}"
+			output="${dir.doc.manual}/bibtex.out"
+			failonerror="true">
+			
+			<arg file="${dir.doc.manual}/main.aux"/>
+			
+			<env key="TEXMFOUTPUT" file="${dir.doc.manual}"/>
+			<env key="BSTINPUTS" file="${dir.docsrc.manual}"/>
+			<env key="BIBINPUTS" file="${dir.docsrc.manual}"/>
+		</exec>
+		
+		<!-- Second LaTeX Run -->
+		<exec executable="latex"
+			dir="${dir.docsrc.manual}"
+			output="${dir.doc.manual}/latex2.out"
+			failonerror="true">
+
+			<arg value="-output-directory"/>
+			<arg file="${dir.doc.manual}"/>
+			<arg file="${dir.docsrc.manual}/main.tex"/>
+			
+			<env key="TEXINPUTS" value="${dir.doc.manual}:${dir.docsrc.manual}:"/>
+		</exec>
+		
+		<!-- Third LaTeX Run -->
+		<exec executable="latex"
+			dir="${dir.docsrc.manual}"
+			output="${dir.doc.manual}/latex3.out"
+			failonerror="true">
+
+			<arg value="-output-directory"/>
+			<arg file="${dir.doc.manual}"/>
+			<arg file="${dir.docsrc.manual}/main.tex"/>
+			
+			<env key="TEXINPUTS" value="${dir.doc.manual}:${dir.docsrc.manual}:"/>
+		</exec>
+		
+		<!-- Create PDF -->
+		<exec executable="dvipdf"
+			dir="${dir.doc.manual}"
+			output="${dir.doc.manual}/dvipdf.out"
+			failonerror="true">
+
+			<arg value="-oKestrelManual.pdf"/>
+			<arg file="${dir.doc.manual}/main.dvi"/>
+			
+			<env key="TEXPICTS" file="${dir.docsrc.manual}"/>
+		</exec>
+		
+	</target>
+	
+		
+	<!--
+		Target: Document Javadoc API
+	-->
+	
+	<target name="doc.javadoc.api"
+		description="Create Javadoc content for public classes and members">
+		
+		<mkdir dir="${dir.doc.javadoc.api}"/>
+		
+		<javadoc
+			access="protected"
+			destdir="${dir.doc.javadoc.api}">
+			
+			<classpath>
+				<pathelement path="${build.classpath}"/>
+			</classpath>
+			
+			<packageset dir="${dir.src}">
+				<include name="**/*"/>
+			</packageset>
+			
+		</javadoc>
+		
+	</target>
+	
+	
+	<!--
+		Target: Document Javadoc API
+	-->
+	
+	<target name="doc.javadoc.full"
+		description="Create Javadoc content for all classes and members">
+		
+		<mkdir dir="${dir.doc.javadoc.full}"/>
+		
+		<javadoc
+			access="private"
+			destdir="${dir.doc.javadoc.full}">
+			
+			<classpath>
+				<pathelement path="${build.classpath}"/>
+			</classpath>
+			
+			<packageset dir="${dir.src}">
+				<include name="**/*"/>
+			</packageset>
+			
+		</javadoc>
+		
+	</target>
+		
+		
+	<!--
+		Target: getversion
+	-->
+	
+	<target name="getversion"
+	    description="Set the version attribute for packaging tasks"
+	    depends="compile">
+		
+		<java classname="edu.gatech.kestrel.util.InfoUtil"
+		    classpath="${dir.build.classes}"
+	        failonerror="true"
+	        outputproperty="kestrel.version">
+		
+	        <arg value="version"/>
+        </java>
+        
+		<property name="packageroot" value="kestrel-${kestrel.version}"/>
+        
+		<echo message="Software version: ${kestrel.version}"/>
+    </target>
+
+</project>

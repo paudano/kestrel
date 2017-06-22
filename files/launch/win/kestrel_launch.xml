@@ -1,0 +1,12 @@
+<launch4jConfig>
+  <headerType>console</headerType>
+  <outfile>kestrel.exe</outfile>
+  <jar>kestrel.jar</jar>
+  <cmdLine></cmdLine>
+  <dontWrapJar>true</dontWrapJar>
+  <errTitle>kestrel</errTitle>
+  <jre>
+    <minVersion>1.7.0</minVersion>
+    <maxHeapSize>4096</maxHeapSize>
+  </jre>
+</launch4jConfig>

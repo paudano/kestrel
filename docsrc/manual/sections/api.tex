@@ -1,0 +1,51 @@
+% Copyright (c) 2017 Peter A. Audano III
+% GNU Free Documentation License Version 1.3 or later
+% See the file COPYING.DOC for copying conditions.
+
+\section{API}
+\label{sec.api}
+
+Kestrel is not only a command line program, it is also an API (Application Programming Interface) that can be driven from other programs. The CLI (Command Line Interface) itself is a simple application that calls the API to carry out tasks.
+
+Kestrel is a Java program, so the API is implemented as a set of Java classes with well documented interfaces. Any Java program can directly call the API classes. Other programs can use technologies such as JNI (Java Native Interfaces) to drive the API from native code, such as C or C++.
+
+Lastly, the command line itself can be used to drive the program from a script or batch file. Because Kestrel always terminates with a well-defined return code, scripts can easily execute the CLI and check for errors. For a list of the return codes, see section~\ref{sec.supl.retcode}.
+
+The remainder of this section outlines the structure and capabilities of the API. It is assumed that a reader of this section has at least a fundamental understanding of Java.
+
+
+%%%%%%%%%%%%%%%%%%%%%
+%%% Documentation %%%
+%%%%%%%%%%%%%%%%%%%%%
+\subsection{Javadoc Documentation}
+\label{sec.api.doc}
+
+The Kestrel API is fully documented with Javadoc comments. Every class and class member (method and field), regardless of scope, has a Javadoc comment. All method arguments, return values, and exceptions are contained in the method's Javadoc comment. For any method arguments that are objects, the comment must disclose what happens when \texttt{null} values are received for that field (either by the argument's comment, or the comment on the exception if one is thrown). All exceptions, whether or not they are runtime exceptions, must be documented along with the conditions that cause them to be thrown. Assertion errors are not documented. Any deviations from these rules should be reported as a program bug.
+
+Javadoc comments can be converted into a set of HTML pages that document the code. In fact, the Java API itself uses Javadoc, so most Java programmers are familiar with the format of the HTML pages. The Kestrel build system will create the Javadoc pages for two different levels: api and full. The API level contains only public and protected members, while the full documentation contains everything. For a programmer interested in using the API or creating a custom component, the API level documentation is probably sufficient. The full documentation is intended for maintenance programmers.
+
+For more information on building Javadoc HTML pages from source, see section~\ref{sec.suppl.building.javadoc}.
+
+
+%%%%%%%%%%%%%%%%%%%%
+%%% Organization %%%
+%%%%%%%%%%%%%%%%%%%%
+\subsection{Project Organization}
+\label{sec.suppl.organization}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%%% Utility Classes %%%
+%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Utility Classes}
+\label{sec.api.util}
+
+Kestrel has several utility classes for shared functionality. Most of the classes are used by multiple components or modules. These classes may also be useful for other applications.
+
+All of these classes are found in package \texttt{edu.gatech.kestrel.util}
+
+%%% BoundedQueue %%%
+\subsubsection{InfoUtil}
+\label{sec.api.util.infoutil}
+

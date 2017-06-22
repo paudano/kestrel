@@ -1,0 +1,46 @@
+### randread.py ###
+Used to generate random sequences.
+
+
+### general.us-ascii.fasta ###
+
+# Randomly generated
+# 	* Sequences: 10
+# 	* Length: 3000 
+
+python3 randread.py -f fasta -n 10 -l 3000 > general.us-ascii.fasta
+
+
+### general.us-ascii.fastq ###
+
+# Randomly generated
+# 	* 10 sequences
+# 	* 3000 bases each 
+
+python3 randread.py -f fastq -n 10 -l 3000 > general.us-ascii.fastq
+
+
+### alliupac.us-ascii.fastq ###
+
+# All legal sequence characters
+
+# Randomly generated
+#   * 20 sequences
+#   * 2000 bases each
+#   * 20% non-ACGT (RYSWKMBDHVN.-)
+#   * Mixed case
+
+python3 randread.py -n 20 -l 2000 -p 0.8 -f fastq -u -m > allchars.us-ascii.fastq
+
+
+### alliupac.us-ascii.fasta ###
+
+# All legal sequence characters
+
+# Randomly generated
+#   * 20 sequences
+#   * 2000 bases each
+#   * 20% non-ACGT (RYSWKMBDHVN.-)
+#   * Mixed case
+
+python3 randread.py -n 20 -l 2000 -p 0.8 -f fasta -u -m > allchars.us-ascii.fasta

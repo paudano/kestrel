@@ -1,0 +1,11 @@
+<launch4jConfig>
+  <headerType>console</headerType>
+  <outfile>cite.exe</outfile>
+  <jar>kestrel.jar</jar>
+  <cmdLine>-hcite</cmdLine>
+  <dontWrapJar>true</dontWrapJar>
+  <errTitle>kestrel</errTitle>
+  <jre>
+    <minVersion>1.7.0</minVersion>
+  </jre>
+</launch4jConfig>

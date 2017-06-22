@@ -1,0 +1,84 @@
+% Copyright (c) 2017 Peter A. Audano III
+% GNU Free Documentation License Version 1.3 or later
+% See the file COPYING.DOC for copying conditions.
+
+\documentclass[a4paper]{article}
+
+\usepackage[parfill]{parskip}  % Block paragraphs
+\usepackage[margin=2.5cm]{geometry}  % Set margins
+\usepackage{float}  % For H float placement
+\usepackage{graphicx}  % Graphics
+
+\usepackage[bottom]{footmisc}  % Footer
+\usepackage{longtable}  % Multi-page table
+
+% Set graphics extension
+\DeclareGraphicsExtensions{.eps}
+
+% Set bibliography style
+\usepackage[sort&compress,comma]{natbib}  % Refereces and citations
+\bibliographystyle{abbrvnat}  % Bibliography style
+
+% Other style
+\def\arraystretch{1.5}  % Pad tables
+
+% Custom commands
+\newcommand{\ddash}{{-}{-}}
+
+\newcommand{\rsec}[1]{\textbf{Section~\ref{#1}}}     % Reference a section
+\newcommand{\rfig}[1]{\textbf{Fig.~\ref{#1}}}        % Reference a figure
+\newcommand{\rfigpart}[2]{\textbf{Fig.~\ref{#1}#2}}  % Reference a figure and part
+\newcommand{\rtab}[1]{\textbf{Table~\ref{#1}}}       % Reference a table
+\newcommand{\reqn}[1]{\textbf{Eqn.~\ref{#1}}}        % Reference an equation
+\newcommand{\figpart}[1]{(\textbf{#1})}              % Annotate a figure part within the caption
+
+% Date and title
+\title{Kestrel Manual\\v1.0.0}
+\date{}
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Begin Document %%%
+%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%%% Title %%%
+\maketitle{}
+
+%%% TOC %%%
+\tableofcontents{}
+\clearpage
+
+%%% Section: Introduction %%%
+\input{sections/intro}
+\clearpage
+
+%%% Section: Command Line Usage %%
+\input{sections/cmdline}
+\clearpage
+
+%%% Section: Kestrel Process %%%
+\input{sections/process}
+\clearpage
+
+%%% Section: API %%%
+\input{sections/api}
+\clearpage
+
+%%% Section: Implementation %%%
+\input{sections/implementation}
+\clearpage
+
+%%% Section: Supplementary Information %%%
+\input{sections/suppl}
+\clearpage
+
+%%% Section: License %%%
+\input{sections/license}
+\clearpage
+
+%%%%%%%%%%%%%%%%%%
+%%% References %%%
+%%%%%%%%%%%%%%%%%%
+\bibliography{main}
+
+\end{document}

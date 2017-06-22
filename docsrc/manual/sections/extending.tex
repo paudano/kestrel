@@ -1,0 +1,105 @@
+% Copyright (c) 2017 Peter A. Audano III
+% GNU Free Documentation License Version 1.3 or later
+% See the file COPYING.DOC for copying conditions.
+
+\section{Extending KAnalyze}
+\label{sec.ext}
+
+WARNING: Loading code from an unknown source or code that is not stable is a significant security and stability risk. Use caution when extending KAnalyze or accepting 3$^{\mathrm{rd}}$ party modules.
+
+KAnalyze was designed to be extensible. As part of this design, new features can be added to KAnalyze \emph{without modifying existing code}. For example, to write a new module, sequence reader, or action for the filter component, no part of the existing system has know about the feature before the feature is loaded.
+
+Only certain parts of the system are loaded dynamically. For example, the module name on the command line is used to locate and load the module class. The subsections below describe the dynamic classes.
+
+Dynamic loading is facilitated by the Java Reflection API. The Java Classloader is given the class name and asked to load it. If the class can be found, it is checked to make sure it fulfills other requirements required for instantiating and running it. KAnalyze requires dynamic classes to have a specific constructor signature and to extend a specific superclass so that it has a way of instantiating an object and calling methods on an otherwise unknown class.
+
+Additional libraries can be specified at runtime, and the classloader will search them when loading dynamic classes. The boostrap classloader, which is the default classloader, is always consulted first. Therefore, it is not possible to override classes built into KAnalyze by loading an external library.
+
+Loading and executing arbitrary code presents a significant security risk and should not be done without caution. If you are loading external libraries, make sure you know and trust where it came from. That external library can execute anything, which means it can read files, modify files, and even install malicious software on the machine. Furthermore, KAnalyze does not require special permissions to run, so it should never be given superuser access.
+
+
+%%%%%%%%%%%%%%%%%%%
+%%% Conventions %%%
+%%%%%%%%%%%%%%%%%%%
+\subsection{Conventions}
+\label{sec.ext.conventions}
+
+In the following set of requirements, \emph{xxx} and \emph{Xxx} is the name of the module in lower case and camel-case, respectively. Capitalization is important.
+
+For example, if the module name is ``supercool'', then \emph{xxx} is ``supercool'' and \emph{Xxx} is ``Supercool''. Note that even though this module name is two words together (``super'' and ``cool''), only capitalize the first letter.
+
+Be aware of how your code affects the system. Use proper exception handling, and never call \texttt{System.exit()}.
+
+
+%%%%%%%%%%%%%%%
+%%% Modules %%%
+%%%%%%%%%%%%%%%
+\subsection{Modules}
+\label{sec.ext.mod}
+
+\subsubsection{Requirements}
+\label{sec.ext.mod.requirements}
+
+\begin{enumerate}
+  \item Module class: \texttt{edu.gatech.kanalyze.module.xxx.XxxModule}\
+  \item Module extends \texttt{edu.gatech.kanalyze.module.KAnalyzeModule}
+  \item Module has a public default constructor with no arguments.
+  \item Module class is not abstract.
+\end{enumerate}
+
+\subsubsection{Initialization}
+\label{sec.ext.mod.init}
+
+The KAnalyze main method is \texttt{edu.gatech.kanalyze.KAnalyzeModule.main()}. This method reads any command line arguments that appear before the module name. Once the module name is reached, it stops processing the command line options. It then uses the module name to build the fully qualified class name, \texttt{edu.gatech.kanalyze.module.xxx.XxxModule}. The class is then loaded and instantiated with the default constructor.
+
+Any libraries loaded with the \texttt{--lib} or \texttt{--liburl} arguments, which appeared before the module name on the command line, are passed to the instantiated module. This allows the module to use the same libraries to load other dynamic components. This occurs before \texttt{configure()} is called.
+
+All command line arguments up to and including the module name are removed from the argument array and used to call \texttt{configure()} on the module object. This allows \texttt{configure()} to process the remaining arguments as if it were the main method. This method returns \texttt{true} if the module should be run in GUI mode, and \texttt{false} if it should run in CLI mode.
+
+If the module is run in CLI mode (\texttt{configure()} returned \texttt{false}), then \texttt{exec()} is called followed by \texttt{postExec()}. \texttt{postExec()} is always called even if \texttt{exec()} throws an exception. \texttt{exec()} must be defined by the module's implementation. \texttt{postExec()} is an empty method that can optionally be overridden.
+
+If the module is run in GUI mode (\texttt{configure()} returned \texttt{true}), then
+\texttt{runGui()} is called. Neither \texttt{exec()} nor \texttt{postExec()} are called in this case. The default implementation of \texttt{runGui()} simply throws \texttt{UnsupportedOperationException}, so override it to launch a GUI if the module has one. If the module does not have a GUI, then never return \texttt{true} from (\texttt{configure()}, and do not override this method. It is up to (\texttt{configure()} to decide when to launch the GUI. For example, the count module launches the GUI if there are no command line arguments to the module or an explicit command line option is used to enter GUI mode.
+
+\subsubsection{Error Handling}
+\label{sec.ext.mod.errors}
+
+Module implementations should never call \texttt{System.exit()} directly or indirectly. If no errors or special conditions occur that stop the module from completing, \texttt{exec()} or \texttt{runGui()} should simply return. To report errors, use any one of the \texttt{error()} or \texttt{warn()} method defined in \texttt{AbstractConditionGenerator}, which \texttt{KAnalyzeModule} extends (via \texttt{KAnalyzeRunnable}).
+
+This uses the error handling system described in Section~\ref{sec.impl.conditions}. \texttt{error()} and \texttt{warn()} generate conditions that are fed into this system. By default, \texttt{KAnalyzeModule} creates an instance of \texttt{KAnalyzeStreamConditionListener} and uses it to handle conditions. In response to erro conditions, this listener reports an error to \texttt{System.err}, calls \texttt{abort()} on the module, terminates the Java virtual machine (JVM) by calling \texttt{System.exit()} with the return code specified by the condition. Therefore, the module may use \texttt{error()} to take down the system. This default assumes that the module is being run directly from the command line, which is usually the case.
+
+If the module is not run from the command line, then the default condition listener must be removed by calling \texttt{clearDefaultConditionListener()} and replaced with a condition listener that reports errors and warnings in a meaningful way. The custom condition listener can be installed by calling \texttt{addListener()}. Failing to do this will take down the JVM and terminate the program that started the module.
+
+\subsubsection{Conventions}
+\label{sec.ext.mod.conventions}
+
+If a help option is invoked on the command line, \texttt{configure()} should print the help message and set a flag so that \texttt{exec()} knows to return immediately without trying to run. The help option should be invoked with \texttt{-h} or \texttt{--help}, and it should not require an argument. It is acceptable to create a help option with optional arguments to output specific details as requested by the user.
+
+\texttt{--lib} and \texttt{--liburl} may be implemented in the module's command line options, which will allow this argument to appear on either side of the module name on the command line. The only requirement is that libraries that must be loaded to find the module itself must be specified before the module name. Since these libraries are shared with the module, additional dynamic classes can be loaded from them. The module may clear it's libraries with \texttt{clearLoaders()}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Sequence Readers %%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sequence Readers}
+\label{sec.ext.readers}
+
+Module requirements:
+
+\begin{enumerate}
+  \item Reader class: \texttt{edu.gatech.kanalyze.comp.reader.xxx.XxxSequenceReader}\
+  \item Reader extends \texttt{edu.gatech.kanalyze.comp.reader.SequenceReader}
+  \item Reader has a constructor with the signature \texttt{(edu.gatech.kanalyze.util.BoundedQueue<edu.gatech.kanalyze.comp.reader.SequenceRead[]>, int, Properties)}
+  \item Reader class is not abstract.
+\end{enumerate}
+
+In the following description, class names without a fully qualified package are found in package \texttt{edu.gatech.kanalyze.comp.reader}.
+
+The reader must implement the \texttt{read()} method from the parent class, \texttt{SequenceReader}. The read method takes a single argument, which is a \texttt{SequenceSource} object. The reader then calls \texttt{getInputStream()} from the source object and reads it until there is no more data to retrieve.
+
+Each sequence string is then written to the next element of a batch array already setup by the parent class, \texttt{readBatch[]}, while incrementing the batch counter, \texttt{batchSize}, until the batch counter is equal to the size of the batch array (the batch is full). The reader then calls \texttt{flush()}, which is implemented by the parent class. \texttt{flush()} will write the batch to the pipeline, create a new batch array, and reset the counter. To summarize, the reader writes sequences to a queue until it is full, then it calls \texttt{flush}, and it repeats the process until all sequences have been read.
+
+The parent class has a protected variable, \texttt{splitLength}. If sequence reads are longer than this, they should be split into multiple reads. The last k - 1 elements from the end of the current split must be copied to the beginning of the next split to preserve correct k-mer generation. For fully assembled sequences, this prevents KAnalyze from memory starvation by attempting to input large reads at once.
+
+Sequence readers should encapsulate the \texttt{read()} method in a try/finally that always calls \texttt{flush()} before it terminates. Failing to do so may result in loss of reads data.
+
