@@ -7,7 +7,7 @@ This work has been submitted to bioRxiv (BIORXIV/2017/153619) and Oxford Bioinfo
 
 Check out releases for the latest version of Kestrel. The software can be run with the `kestrel` script or with `java -Xmx4G -jar kestrel.jar`. Use the `--help` (or `-h`) option for a list of available parameters.
 
-Do not separate `kestrel.jar` from the other JAR files in its directory. You may create symbolic links in another direcotry to `kestrel.jar`. If the JAR file itself is moved, the other JAR files must be moved along with it. If the JAR files are separated, Kestrel will not be able to find libraries it depends on.
+Do not separate `kestrel.jar` from the other JAR files in its directory. You may create symbolic links in another direcotry to the Kestrel execution script, `kestrel`. If the JAR files are separated or if Kestrel is run from a link to `kestrel.jar`, then it will not be able to find libraries it depends on. The most likely error message will be related to finding modules to read files, such as "Could not automatically resolve a file type from the file name".
 
 ## Download a Release
 
@@ -15,7 +15,7 @@ The easiest way to get Kestrel is to download the [Latest Release](https://githu
 
 `tar -zxvf kestrel-X.Y.Z-linux.tar.gz` where X, Y, and Z are the major, minor, and release version numbers.
 
-All of Kestrel's dependencies are packaged in the directory, and there is nothing to build. Do not move `kestrel.jar` from the directory with the other JAR files. If it is separated form the other JAR files, Kestrel will not be able to find its dependenices. It can be symbolically linked into another directory without issues.
+All of Kestrel's dependencies are packaged in the directory, and there is nothing to build. Do not move `kestrel.jar` from the directory with the other JAR files.
 
 ## Basic Usage
 
@@ -24,9 +24,11 @@ Java 1.7 or later is needed to run Kestrel.
 From an un-tarred release, Kestrel can be run using the `kestrel` script or by running the JAR file directly with Java.
 
 For example:
-`./kestrel -r REFERENCE.fasta -o VARIANTS.vcf READS.fastq
+`./kestrel -r REFERENCE.fasta -o VARIANTS.vcf READS.fastq`
 
-See `./kestrel -h` for all of Kestrel's options. More documentation for these options will appear in the Kestrel manual, which is currently incomplete.
+See `./kestrel -h` for all of Kestrel's options.
+
+The Kestrel manual distributed with each release has a comlpete list of options and how to apply them. The manual is in the process of being updated, and it is not yet complete. We apologize for any inconvenience this causes.
 
 ## Clone and Build
 
