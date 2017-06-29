@@ -245,10 +245,10 @@ public abstract class KestrelRunnerBase extends KAnalyzeRunnable {
 	public static final int DEFAULT_KSIZE = 31;
 	
 	/** Default output file name. */
-	public static final StreamableOutput DEFAULT_OUTPUT_FILE = StreamableOutput.get("kestrel.table", null);
+	public static final StreamableOutput DEFAULT_OUTPUT_FILE = StreamableOutput.STDOUT;
 	
 	/** Default output format. */
-	public static final String DEFAULT_OUTPUT_FORMAT = "table";
+	public static final String DEFAULT_OUTPUT_FORMAT = "vcf";
 	
 	/** Default log file location. */
 	public static final StreamableOutput DEFAULT_LOG_FILE = StreamableOutput.get(FileDescriptor.err);

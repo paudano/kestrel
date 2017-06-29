@@ -92,7 +92,7 @@ public enum LogLevel {
 			if (logLevel.name().equals(levelName))
 				return logLevel;
 		
-		throw new IllegalArgumentException("Unknown log level name: " + orgLevelName);
+		throw new IllegalArgumentException(String.format("Unknown log level name: %s: Valid leveles are %s", levelName, levelList(true)));
 	}
 	
 	/**

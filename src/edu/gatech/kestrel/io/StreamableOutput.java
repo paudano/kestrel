@@ -47,7 +47,10 @@ public class StreamableOutput {
 	public final String name;
 	
 	/** Standard output file descriptor. */
-	public static final StreamableOutput STDOUT = new StreamableOutput(null, FileDescriptor.out, "STDOUT");
+	public static final StreamableOutput STDOUT = new StreamableOutput(null, FileDescriptor.out, "<STDOUT>");
+	
+	/** Standard output file descriptor. */
+	public static final StreamableOutput STDERR = new StreamableOutput(null, FileDescriptor.err, "<STDERR>");
 	
 	/**
 	 * Get a streamable output object.
@@ -137,16 +140,16 @@ public class StreamableOutput {
 		assert (fd != null) :
 			"File descriptor is null";
 		
-		if (name == null) {
-			if (fd == FileDescriptor.out)
-				name = "<STDOUT>";
-			
-			else if (fd == FileDescriptor.err)
-				name = "<STDOUT>";
-			
-			else
-				name = "<UNKNOWN_FILE_DESCRIPTOR>";
-		}
+		// Return standard descriptors
+		if (fd == FileDescriptor.out)
+			return STDOUT;
+		
+		if (fd == FileDescriptor.err)
+			return STDERR;
+		
+		// Set default name
+		if (name == null)
+			name = "<UNKNOWN_FILE_DESCRIPTOR>";
 		
 		// Return object
 		return new StreamableOutput(null, fd, name);

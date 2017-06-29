@@ -87,20 +87,20 @@ public class CoverageVariantFilter extends VariantFilter {
 					throw new IllegalArgumentException(String.format("Cannot configure coverage variant filter: Argument at positon %d is not a number: %s", argTokIndex + 1, argTok[argTokIndex]));
 				}
 				
-				if (minCoverage < 0.0 && minCoverage > 1.0)
-					throw new IllegalArgumentException(String.format("Cannot configure coverage variant filter: Argument at positon %d: Minimum coverage must be between 0.0 and 1.0 (inclusive): %d (%s)", argTokIndex + 1, minCoverage, argTok[argTokIndex]));
+				if (minCoverage < 0.0 || minCoverage > 1.0)
+					throw new IllegalArgumentException(String.format("Cannot configure coverage variant filter: Argument at positon %d: Minimum coverage must be between 0.0 and 1.0 (inclusive): %f (%s)", argTokIndex + 1, minCoverage, argTok[argTokIndex]));
 				
 			} else if (attrTok[0].equals("depth") || attrTok[0].equals("dep") || attrTok[0].equals("d")) {
 				
 				try {
-					minCoverage = Double.parseDouble(attrTok[0]);
+					minDepth = Integer.parseInt(attrTok[0]);
 					
 				} catch (NumberFormatException ex) {
-					throw new IllegalArgumentException(String.format("Cannot configure coverage variant filter: Argument at position %d: Minimum depth is not an integer: %s", argTokIndex + 1, argTok[argTokIndex]));
+					throw new IllegalArgumentException(String.format("Cannot configure depth variant filter: Argument at position %d: Minimum depth is not an integer: %s", argTokIndex + 1, argTok[argTokIndex]));
 				}
 				
-				if (minCoverage < 0.0 && minCoverage > 1.0)
-					throw new IllegalArgumentException(String.format("Cannot configure coverage variant filter: Argument at positon %d: Minimum depth must be between 0.0 and 1.0 (inclusive): %d (%s)", argTokIndex + 1, minCoverage, argTok[argTokIndex]));
+				if (minDepth < 0)
+					throw new IllegalArgumentException(String.format("Cannot configure depth variant filter: Argument at positon %d: Minimum depth must be greater than 0: %d (%s)", argTokIndex + 1, minDepth, argTok[argTokIndex]));
 				
 			} else {
 				

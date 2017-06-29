@@ -306,7 +306,7 @@ public abstract class VariantWriter {
 			writerArgs = "";
 		
 		// Get reader class
-		writerClass = getWriterClass(writerSpecTok[0], loader);  // throws IllegalArgumentException, ReaderInitException
+		writerClass = getWriterClass(writerName, loader);  // throws IllegalArgumentException, ReaderInitException
 		
 		// Invoke constructor
 		try {

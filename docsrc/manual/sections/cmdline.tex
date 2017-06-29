@@ -30,9 +30,14 @@ Java 1.7 (aka Java 7) must be installed in order to run any commands in this sec
 \label{sec.cmdline.javacommand}
 
 General form:\\
-\texttt{java -jar -Xmx3G kestrel.jar <arguments ...>}
+\texttt{java -jar -Xmx4G kestrel.jar <arguments ...>}
 
-This allocates 3 GB of RAM (-Xmx3G).
+This allocates 4 GB of RAM (-Xmx4G).
+
+If memory does not need to be tuned, the `kestrel` script may be run.
+
+Do not separate `kestrel.jar` from the other JAR files. They must be in the same directory or Kestrel will not be able to find libraries it depends on, such as KAnalyze. You may create a symbolic link to `kestrel.jar` or `kestrel` from any directory and the JAR file will resolve relative to its own location.
+
 
 %%%%%%%%%%%%%%%%%%%%%
 %%% Example Usage %%%
@@ -58,6 +63,25 @@ This allocates 3 GB of RAM (-Xmx3G).
 \subsection{Command options}
 \label{sec.cmdline.opts}
 
+\subsubsection{Getting Help}
+\label{sec.cmdline.opts.help}
+
+\begin{small}
+	\begin{longtable}{|p{\optwidth}|p{\argwidth}|p{\dscwidth}|p{\defwidth}|}
+		\hline
+		
+		% Header
+		\textbf{Option} & \textbf{Argument} & \textbf{Description} & \textbf{Default} \\ \hline
+	
+		% Help
+		\optbox{\sopt{h}\\\lopt{help}} & [TOPIC] &
+		Get help on the command line. If TOPIC is not supplied, general command line usage and all options are printed. Print help on a specific topic if TOPIC is given. See -htopics (or \ddash{}help=topics) for a list of topics and -hcite for information about how to cite Kestrel.
+		&
+		\\ \hline
+		
+	\end{longtable}
+\end{small}
+
 
 \subsubsection{Input and Output}
 \label{sec.cmdline.opts.io}
@@ -70,218 +94,230 @@ This allocates 3 GB of RAM (-Xmx3G).
 		\textbf{Option} & \textbf{Argument} & \textbf{Description} & \textbf{Default} \\ \hline
 		
 		% Input format
-		\optbox{-f\\\ddash{}format} & FORMAT &
+		\optbox{\sopt{f}\\\lopt{format}} & FORMAT &
 		Specify the format of input sequence files. Built-in readers are ``fastq'', ''fasta'', ``fastqgz'', ``fastagz'' for FASTQ and FASTA files and gzipped versions of them, and ``ikc'' for indexed k-mer count files (a KAnalyze format). The default, ``auto'', will attempt to determine the file type by its name. This option applies to all input files that follow it on the command line.
 		& auto
 		\\ \hline
 		
 		% Output file name
-		\optbox{-o\\\ddash{}out} & FILE &
+		\optbox{\sopt{o}\\\lopt{out}} & FILE &
 		Name of the file where output should be directed.
-		& kestrel.table
-		\\ \hline
-		
-		% Stdout
-		\ddash{}stdout & &
-		Send output to the screen, STDOUT.
 		&
 		\\ \hline
 		
+		% Stdout
+		\lopt{stdout} & &
+		Send output to the screen, STDOUT.
+		& TRUE
+		\\ \hline
+		
 		% Output format
-		\optbox{-m\\\ddash{}outfmt} & FORMAT &
-		Format of the output. Built-in formats are ``table'' for a tab-delimited table, and ``txt'' for text output.
-		& table
+		\optbox{\sopt{m}\\\lopt{outfmt}} & FORMAT &
+		Format of the output. Built-in formats are ``vcf'', ``table'' for a tab-delimited table, and ``txt'' for readable text output.
+		& vcf
+		\\ \hline
+		
+		% Haplotype output
+		\optbox{\sopt{p}\\\lopt{hapout}} & FILE &
+		Set aligned haplotypes to an output file. If this option is not specified, haplotypes are not written.
+		&
+		\\ \hline
+		
+		% Haplotype format
+		\lopt{hapfmt} & FORMAT &
+		If haplotype output is enabled, then this is the format of the output file. The default, ``sam'', writes the aligned haplotypes relative to the reference sequence.
+		& sam
 		\\ \hline
 		
 		% Log file name
-		\ddash{}logfile & FILE &
+		\lopt{logfile} & FILE &
 		Specify the name of a log file.
 		&
 		\\ \hline
 		
 		% Log to STDOUT
-		\ddash{}logstdout & &
+		\lopt{logstdout} & &
 		Send log messages to STDOUT.
 		&
 		\\ \hline
 		
 		% Log to STDERR
-		\ddash{}logstderr & &
+		\lopt{logstderr} & &
 		Send log messages to STDERR.
 		& TRUE
 		\\ \hline
 		
 		% Log level
-		\ddash{}loglevel & LEVEL &
+		\lopt{loglevel} & LEVEL &
 		Set the logging level. Valid log levels are ``ALL'', ``TRACE'', ``DEBUG'', ``INFO'', ``WARN'', ``ERROR'', and ``OFF''.
 		& OFF
 		\\ \hline
 		
 		% Files per sample
-		\ddash{}filespersample & N &
-		Automatically divide input files into discrete samples by the number of samples. This may be useful for loading many samples by listing them on the command-line. For example, to load paired-end reads in multiple samples, set this value to ``2''. Note that Kestrel does not associate files by their name, so related files must be grouped together in the order they are listed. By defaulte, Kestrel loads all files as a single sample.
+		\lopt{filespersample} & N &
+		Automatically divide input files into discrete samples by the number of samples. This may be useful for loading many samples by listing them on the command-line. For example, to load paired-end reads in multiple samples, set this value to ``2''. Note that Kestrel does not associate files by their name, so related files must be grouped together in the order they are listed. By default, Kestrel loads all files as a single sample.
 		& $\infty$
 		\\ \hline
 		
 		% Sample set
-		\optbox{-s\\\ddash{}sample} & \textless{}NAME\textgreater &
-		All input files on the command line following this option are grouped into a single sample with name ``NAME''. If ``NAME'' is not specified, then the sample name is derived from the first input file in the sample set. If \ddash{}filespersample was specified, it is undone and all samples go into this sample set. If \ddash{}filespersample is specified at some point after this option, it takes precedence and splits files into samples.
+		\optbox{\sopt{s}\\\lopt{sample}} & [NAME] &
+		All input files on the command line following this option are grouped into a single sample with name NAME. If NAME is not specified, then the sample name is derived from the first input file in the sample set. If \ddash{}filespersample was specified, it is undone and all samples go into this sample set. If \ddash{}filespersample is specified at some point after this option, it takes precedence and splits files into samples.
 		&
 		\\ \hline
 		
 		% Reference
-		\optbox{-r\\\ddash{}ref} & FILE &
+		\optbox{\sopt{r}\\\lopt{ref}} & FILE &
 		Specifies the name of the FASTA file containing the reference sequences variants are called against. This option may be used multiple times, and FASTA files may contain any number of records. All FASTA Records must have a unique description.
 		&
 		\\ \hline
 		
 		% K-mer size
-		\optbox{-k\\\ddash{}ksize} & KSIZE &
+		\optbox{\sopt{k}\\\lopt{ksize}} & KSIZE &
 		Specify the size of k-mers sequence data is transformed to.
 		& 31
 		\\ \hline
 		
 		% Library
-		\ddash{}lib & FILE &
+		\lopt{lib} & FILE &
 		Load an external library containing extensions for Kestrel, such as a custom output format. FILE may be a JAR file or a directory containing Java class files.
 		&
 		\\ \hline
 		
 		% Library URL
-		\ddash{}liburl & URL &
+		\lopt{liburl} & URL &
 		Load a library containing extensions for Kestrel. The library is specified as a URL string, and it can be any URL facility that Java can recognize, locate, and load.
 		&
 		\\ \hline
 		
 		% Charset
-		\ddash{}charset & CHARSET &
+		\lopt{charset} & CHARSET &
 		Character set encoding of input files. This option specifies the character set of all files following it. The default, ``UTF-8'', properly handles ASCII files, which is a safe assumption for most files. Latin-1 files with values greater than 127 will not be properly parsed.
 		& UTF-8
 		\\ \hline
 		
 		% Sequence filter
-		\optbox{\ddash{}seqfilter\\\ddash{}quality} & SPEC &
+		\optbox{\lopt{seqfilter}\\\lopt{quality}} & SPEC &
 		Filter sequences as they are read and before k-mers are extracted from them. Some sequence readers can filter or alter reads at runtime. The most common filter is a quality filter where low-quality bases are removed. The filter specification is a filter name followed by a colon (:) and arguments to the filter. If a filter name is not specified, then the ``sanger'' quality filter is assumed. For example, ``sanger:10'' and ``10'' will filter k-mers with any base quality score less than 10. The sequence filter specification is set for all files appearing on the command-line after this option. To turn off filtering once it has been set, files following \ddash{}noseqfilter will have no filter specification.
 		&
 		\\ \hline
 		
 		% No sequence filter
-		\ddash{}noseqfilter & &
+		\lopt{noseqfilter} & &
 		Turn off filters for input files following this option.
 		&
 		\\ \hline
 		
 		% Temp file location
-		\ddash{}temploc & DIR &
+		\lopt{temploc} & DIR &
 		Name of the directory where KAnalyze stores temporary files.
 		& \parbox{2cm}{Current\\directory}
 		\\ \hline
 		
 		% Minimum k-mer count
-		\ddash{}mincount & COUNT &
+		\lopt{mincount} & COUNT &
 		A k-mer with a frequency of this value or less is ignored. This keeps the IKC file to a reasonable size by reducing the number of erroneous k-mers from sequencing errors.
 		& 5
 		\\ \hline
 		
 		% Minimizer size
-		\ddash{}minsize & &
+		\lopt{minsize} & &
 		Minimizers group k-mers in the indexed k-mer count (IKC) file generated by Kestrel when reading sequences, and this parameter controls the size of the minimizer.
 		& 15
 		\\ \hline
 		
 		% Minimizer mask
-		\ddash{}minmask & &
+		\lopt{minmask} & &
 		K-mers over low-complexity loci may create large minimizer groups, and a minimizer mask may break up these groups.
 		& 0x00000000
 		\\ \hline
 		
 		% Count in memory
-		\ddash{}memcount & &
+		\lopt{memcount} & &
 		When sequence reads are input, this option will count them in memory instead of an IKC file.
 		&
 		\\ \hline
 		
 		% No count in memory
-		\ddash{}nomemcount & &
+		\lopt{nomemcount} & &
 		When sequence reads are input, generate an IKC file and query k-mer frequencies from it.
 		& TRUE
 		\\ \hline
 		
 		% Remove IKC
-		\ddash{}rmikc & &
+		\lopt{rmikc} & &
 		Remove the indexed k-mer count (IKC) for each sample after kestrel runs.
 		& TRUE
 		\\ \hline
 		
 		% No remove IKC
-		\ddash{}normikc & &
+		\lopt{normikc} & &
 		Do not remove the indexed k-mer count (IKC) file for each sample.
 		& TRUE
 		\\ \hline
 		
 		% Count reverse k-mers
-		\ddash{}countrev & &
+		\lopt{countrev} & &
 		Count reverse complement k-mers in region statistics. This should be set for most sequencing protocols.
 		& TRUE
 		\\ \hline
 		
 		% No count reverse k-mers
-		\ddash{}nocountrev & &
+		\lopt{nocountrev} & &
 		Do not include the reverse complement of k-mers in read depth estimates. If all sequence reads are in the same orientation as the reference, then this option should be used.
 		&
 		\\ \hline
 		
 		% Read interval
-		\optbox{-i\\\ddash{}interval} & FILE &
+		\optbox{\sopt{i}\\\lopt{interval}} & FILE &
 		Reads a file of intervals defining the regions over the reference sequences where variants should be detected. If no intervals are specified, variants are detected over the full length of each reference sequence. The file type is determined by the file name, such as ``intervals.bed''.
 		&
 		\\ \hline
 		
 		% Flank length
-		\ddash{}flank & LENGTH &
+		\lopt{flank} & LENGTH &
 		When reading an interval from a reference, extract sequences beyond the boundaries of the interval to assist active region detection. Variants within the flanks are discarded.
 		&
 		$k \cdot 3.5$
 		\\ \hline
 		
 		% Default flank length
-		\ddash{}autoflank & &
-		The flank length is automatically chosen by the k-mer size.
+		\lopt{autoflank} & &
+		When calling variants with an interval file (a BED files that restricts calling to specific regions), extend active region detection beyond the region boundaries. Variants found outside regions are still discarded. This makes better calls for variants at the edge of the regions. The flank length is automatically chosen by the k-mer size if this option is not used.
 		& $k \cdot 3.5$
 		\\ \hline
 		
 		% By reference
-		\ddash{}byreference & &
+		\lopt{byreference} & &
 		If variant call regions were defined, variant call locations are relative to the reference sequence and not the region.
 		& TRUE
 		\\ \hline
 		
 		% By region
-		\ddash{}byregion & &
+		\lopt{byregion} & &
 		If variant call regions were defined, variant call locations are relative to each region instead of the reference sequence.
 		&
 		\\ \hline
 		
 		% Remove reference description
-		\ddash{}rmrefdesc & &
+		\lopt{rmrefdesc} & &
 		When set, remove the description from reference sequence names. The descirption is everything that occurs after the first whitespace character. FASTA files often have a sequence name and a long description separated by whitespace. This option ensures that the sequence name matches in the FASTA and an interval file, if used.
 		& TRUE
 		\\ \hline
 		
 		% Do not remove the reference description
-		\ddash{}normrefdesc & &
+		\lopt{normrefdesc} & &
 		Use the full sequence name as it appears in the reference sequence file. FASTA files often include a description after the sequence name, and with this option, it becomes part of the full sequence name. If using an interval file, the full sequence name and description must match the sequence file.
 		&
 		\\ \hline
 		
 		% Reverse region
-		\ddash{}revregion & &
+		\lopt{revregion} & &
 		When set, reverse complement reference regions that occur on the negative strand, and all variant calls are relative to the reverse-complemented sequence. Only itervals defined with on the negative strand are altered.
 		&
 		\\ \hline
 		
 		% No reverse region
-		\ddash{}norevregion & &
+		\lopt{norevregion} & &
 		When set, regions variants are called on are always in the same orientation as the reference sequence. The stranded-ness of defined intervals is ignored.
 		& TRUE
 		\\ \hline
@@ -303,50 +339,62 @@ This allocates 3 GB of RAM (-Xmx3G).
 		\textbf{Option} & \textbf{Argument} & \textbf{Description} & \textbf{Default} \\ \hline
 		
 		% Min count diff
-		\ddash{}mindiff & DIFF &
+		\lopt{mindiff} & DIFF &
 		Set the minimum k-mer count difference for identifying active regions. The difference threshold determined by the difference quantile will never be less than this value.
 		& 5
 		\\ \hline
 		
 		% Difference quantile
-		\ddash{}diffq & DIFFQ &
+		\lopt{diffq} & DIFFQ &
 		If set to a value greater than 0.0, then the k-mer count difference between two k-mers that triggers an active region scan is found dynamically. The difference in k-mer counts between each pair of neighboring k-mers over an uncorrected reference region is found, and this quantile of is computed over those differences. The default value of 0.90 means that at most 10\% of the k-mer count differences will be high enough. If this computed value is less than the minimum k-mer count difference (\ddash{}mindiff), then that minimum is the difference threshold. This value may not be 1.0 or greater, and it may not be negative. If 0.0, the minimum count difference is always the minimum threshold (\ddash{}mindiff).
 		& 0.90
 		\\ \hline
 		
 		% Peak scan length
-		\ddash{}peakscan & LENGTH &
+		\lopt{peakscan} & LENGTH &
 		Reference regions with sequence homology in other regions of the genome may contain k-mers with artificially high frequencies from adding counts for k-mers that appear in those regions. This causes a peak in the k-mer frequencies over the reference, and it can trigger an erroneous active-region scan for variants. Kestrel will scan forward this number of k-mers looking for a peak in the k-mer frequencies. If the counts drop back down to the original range, the active region scan is stopped. This keeps Kestrel from erroneously searching large regions of the reference. Setting this value to 0 disables peak detection.
 		& 7
 		\\ \hline
 		
 		% Scan limit factor		
-		\ddash{}scanlimitfactor & FACTOR &
+		\lopt{scanlimitfactor} & FACTOR &
 		Set a limit on how long an active region may be. This is computed by multiplying the k-mer size by this factor and adding the maximum length of a gap. The computed limit will be adjusted so that active regions are at least large enough to capture a SNP in cases where the maximum gap length is 0. Setting this to a low value or \"min\" will set the limit so that it is just large enough to catch SNPs and deletions, but it will miss large deletions if another variant is within the k-mer size window. Setting this to a high value or "\"max\" lifts the restrictions on active region lengths, and this may cause the program to take an excessive amount of time and memory trying to solve arbitrarily long active regions.
 		& 5.0
 		\\ \hline
 		
 		% Decay minimum
-		\ddash{}decaymin & FACTOR &
+		\lopt{decaymin} & FACTOR &
 		Set the minimum value (asymptotic lower bound) of the exponential decay function used in active region detection as a proportion of the anchor k-mer count. If this value is 0.0, k-mer count recovery threshold may decline to 1. If this value is 1.0, the decay function is not used and the detector falls back to finding a k-mer with a count within the difference threshold of the anchor k-mer count.
 		& 0.55
 		\\ \hline
 		
 		% Decay alpha
-		\ddash{}alpha & ALPHA &
+		\lopt{alpha} & ALPHA &
 		Set the exponential decay alpha, which controls how quickly the recovery threshold declines to its minimum value (see \ddash{}decaymin) in an active region search. Alpha is defined as the rate of decay for every k bases. At k bases from the left anchor, the threshold will have declined to $\alpha \cdot$ range. At every k bases, the threshold will continue to decline at this rate ($\alpha^n \cdot$ range).
 		& 0.80
 		\\ \hline
 		
 		% Anchor both
-		\ddash{}anchorboth & &
+		\lopt{anchorboth} & &
 		Active regions may not go to the ends of the references. This reduces false-calls from noise, but it can miss variant calls near the ends.
 		& TRUE
 		\\ \hline
 		
 		% No anchor both
-		\ddash{}noanchorboth & &
+		\lopt{noanchorboth} & &
 		Active regions ma go to the ends of the references. This may call variants near the ends, but it may also result in false calls.
+		&
+		\\ \hline
+		
+		% Amiguous regions
+		\lopt{ambiregions}  & &
+		Allow active regions that contain ambiguous bases.
+		& TRUE
+		\\ \hline
+		
+		% No ambiguous regions
+		\lopt{noambigregions} & &
+		Discard all active regions that contain at least one ambiguous base.
 		&
 		\\ \hline
 		
@@ -367,16 +415,23 @@ This allocates 3 GB of RAM (-Xmx3G).
 		\textbf{Option} & \textbf{Argument} & \textbf{Description} & \textbf{Default} \\ \hline
 		
 		% Alignment weight vector
-		\optbox{-w\\\ddash{}weight} & VECTOR &
+		\optbox{\sopt{w}\\\lopt{weight}} & VECTOR &
 		Set the alignment weights as a comma-separated list of values. The order of weights is match, mismatch, gap-open, gap-extend, and initial score. If values are blank or the list has fewer than 5 elements, the missing values are assigned their default weight. Each value is a floating-point number, and it may be represented in exponential form (e.g. 1.0e2) or as an integer in hexadecimal or octal format. Optionally, the list may be surrounded by parenthesis or braces (angle, square, or curly). If the initial score is empty or missing, it defaults to the k-mer size multiplied by the match score.
 		& ``10, -10, -40, -4, 0''
 		\\ \hline
 		
 		% Maximum align states
-		\ddash{}maxalignstates & &
+		\lopt{maxalignstates} & STATES &
 		Set the maximum number of alignment states. When haplotype assembly branches into more than one possible sequence, the state of one is saved while another is built. When the maximum number of saved states reaches this value, the least likely one is discarded.
 		& 15
 		\\ \hline
+		
+		% Maximum haplotypes
+		\lopt{maxhapstates} & STATES &
+		Set the maximum number of haplotypes for an active region. Alignments can generate more than one haplotype, and with noisy sequence data or paralogues, many haplotypes may be found. This options limits the amount of memory that can be consumed in these cases.
+		& 15
+		\\ \hline
+
 
 	\end{longtable}
 \end{small}
@@ -394,32 +449,20 @@ This allocates 3 GB of RAM (-Xmx3G).
 		% Header
 		\textbf{Option} & \textbf{Argument} & \textbf{Description} & \textbf{Default} \\ \hline
 		
-		% Amiguous regions
-		\ddash{}ambiregions  & &
-		Call variants in active regions that contain ambiguous bases.
-		& TRUE
-		\\ \hline
-		
-		% No ambiguous regions
-		\ddash{}noambigregions & &
-		Discard all active regions that contain at least one ambiguous base.
-		&
-		\\ \hline
-		
 		% Amiguous variants
-		\ddash{}ambivar & &
+		\lopt{ambivar} & &
 		Call variants at where the reference contains an ambiguous base.
 		& TRUE
 		\\ \hline
 		
 		% No ambiguous variants
-		\ddash{}noambivar & &
+		\lopt{noambivar} & &
 		Discard all variant calls over ambiguous reference bases.
 		&
 		\\ \hline
 		
 		% Variant filter
-		\ddash{}varfilter & SPEC &
+		\lopt{varfilter} & SPEC &
 		Add a variant filter specification. The argument should be the name of the filter, a colon, and the filter arguments. The correct filter is loaded by name and the filter arguments are passed to it.
 		&
 		\\ \hline
@@ -440,13 +483,13 @@ This allocates 3 GB of RAM (-Xmx3G).
 		\textbf{Option} & \textbf{Argument} & \textbf{Description} & \textbf{Default} \\ \hline
 		
 		% Free resources
-		\ddash{}free & &
+		\lopt{free} & &
 		Free resources between processing samples. This may reduce the memory footprint of Kestrel, but it may force expensive resources to be recreated and impact performance.
 		&
 		\\ \hline
 		
 		% No free resources
-		\ddash{}nofree & &
+		\lopt{nofree} & &
 		Retain resources between samples. This may use more memory, but it will avoid re-creating expensive resources between samples.
 		& TRUE
 		\\ \hline

@@ -25,12 +25,41 @@
 % Custom commands
 \newcommand{\ddash}{{-}{-}}
 
-\newcommand{\rsec}[1]{\textbf{Section~\ref{#1}}}     % Reference a section
-\newcommand{\rfig}[1]{\textbf{Fig.~\ref{#1}}}        % Reference a figure
-\newcommand{\rfigpart}[2]{\textbf{Fig.~\ref{#1}#2}}  % Reference a figure and part
-\newcommand{\rtab}[1]{\textbf{Table~\ref{#1}}}       % Reference a table
-\newcommand{\reqn}[1]{\textbf{Eqn.~\ref{#1}}}        % Reference an equation
-\newcommand{\figpart}[1]{(\textbf{#1})}              % Annotate a figure part within the caption
+\newcommand{\denovo}{\textit{de~novo}}
+\newcommand{\Denovo}{\textit{De~novo}}
+
+\newcommand{\apriori}{\textit{a~priori}}
+\newcommand{\etal}{\textit{et~al.}}
+
+\newcommand{\spneumo}{\textit{S.~pneumoniae}}
+\newcommand{\streppneumo}{\textit{Streptococcus pneumoniae}}
+
+\newcommand{\nmen}{\textit{N.~meningitidis}}
+\newcommand{\neismen}{\textit{Neisseria meningitidis}}
+
+\newcommand{\mtub}{\textit{M.~tuberculosis}}
+\newcommand{\mycotub}{\textit{Mycobacterium tuberculosis}}
+
+\newcommand{\ecoli}{\textit{E.~coli}}
+\newcommand{\esccoli}{\textit{Escherichia coli}}
+
+\newcommand{\figpart}[1]{(\textbf{#1})}
+
+\newcommand{\rfig}[1]{\textbf{Fig.~\ref{#1}}}
+\newcommand{\rpfig}[2]{\textbf{Fig.~\ref{#1}(#2)}}
+\newcommand{\rtab}[1]{\textbf{Table~\ref{#1}}}
+
+\newcommand{\req}[1]{\textbf{Equation~\ref{#1}}}
+\newcommand{\eqnrng}[2]{\textbf{Equations~\ref{#1}-\ref{#2}}}
+
+\newcommand{\rsec}[1]{\textbf{Section~\ref{#1}}}
+\newcommand{\rsecsup}[1]{\textbf{Supplementary Section~#1}}
+\newcommand{\rsecssup}[1]{\textbf{Supplementary Sections~#1}}
+\newcommand{\rfigsup}[1]{\textbf{Supplementary Figure~#1}}
+
+% Command-line options
+\newcommand{\lopt}[1]{\textbf{\ddash{}#1}}
+\newcommand{\sopt}[1]{\textbf{-#1}}
 
 % Date and title
 \title{Kestrel Manual\\v1.0.0}

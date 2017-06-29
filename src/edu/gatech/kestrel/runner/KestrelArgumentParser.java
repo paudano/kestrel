@@ -2563,7 +2563,7 @@ public class KestrelArgumentParser extends ArgumentParser {
 		public OptVarCallRelativeRegion() {
 			super('\0', "byregion",
 					OptionArgumentType.NONE,
-					null, "",
+					null, null,
 					"If variant call regions were defined, variant call locations are relative to the " +
 					"region and not the reference sequence."
 					);
