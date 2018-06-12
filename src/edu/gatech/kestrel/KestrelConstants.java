@@ -41,7 +41,7 @@ public class KestrelConstants {
 	public static final int VERSION_MINOR = 0;
 	
 	/** Revision version numbers. */
-	public static final int VERSION_REVISION = 1;
+	public static final int VERSION_REVISION = 2;
 	
 	/** Development version. If not <code>0</code>, this is not a release version. */
 	public static final int VERSION_DEV = 0;

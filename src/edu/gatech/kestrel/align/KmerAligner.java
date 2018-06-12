@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.gatech.kanalyze.util.Base;
+import edu.gatech.kanalyze.util.KmerHashSet;
 import edu.gatech.kanalyze.util.kmer.KmerUtil;
 import edu.gatech.kestrel.KestrelConstants;
 import edu.gatech.kestrel.activeregion.ActiveRegion;
@@ -171,7 +172,7 @@ public final class KmerAligner {
 	private static final int TYPE_LIST_CACHE_CAPACITY = 0;  // DBGTMP: Set to 0 from 10 for troubleshooting
 	
 	/** Default maximum number of stored states. */
-	public static final int DEFAULT_MAX_STATE = 15;
+	public static final int DEFAULT_MAX_STATE = 10;
 	
 	
 	/**
@@ -788,7 +789,7 @@ public final class KmerAligner {
 	 *   <code>null</code>.
 	 * @throws IllegalArgumentException If <code>minDepth</code> is less than <code>1</code>.
 	 */
-	public final void saveState(int[] kmer, Base nextBase, int minDepth)
+	public final void saveState(int[] kmer, Base nextBase, int minDepth, KmerHashSet kmerHash, int repeatCount)
 			throws NullPointerException, IllegalArgumentException {
 		
 		TraceNodeContainer alignContainer;
@@ -806,6 +807,12 @@ public final class KmerAligner {
 		
 		if (minDepth < 1)
 			throw new IllegalArgumentException("Minimum depth may not be less than 1: " + minDepth);
+		
+		if (kmerHash == null)
+			throw new NullPointerException("Connot save state with k-mer hash: null");
+		
+		if (repeatCount < 0)
+			throw new IllegalArgumentException("Repeat count must be non-negative: " + repeatCount);
 		
 		// Check max depth
 		if (nState == maxState) {
@@ -861,7 +868,9 @@ public final class KmerAligner {
 				maxAlignmentScore,
 				maxAlignmentScoreNode,
 				minDepth,
-				stateStack
+				stateStack,
+				new KmerHashSet(kmerHash),
+				repeatCount
 		);
 		
 		if (stateStack.nextNodeDown != null)  // Set upward link on previous state

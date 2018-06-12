@@ -198,6 +198,7 @@ public class KestrelRunner extends KestrelRunnerBase implements Runnable {
 			arDetector.setDecayAlpha(expDecayAlpha);
 			arDetector.setMaxAlignerState(maxAlignerState);
 			arDetector.setMaxHaplotypes(maxHaplotypes);
+			arDetector.setMaxRepeatCount(maxRepeatCount);
 			
 			// Open output
 			try {

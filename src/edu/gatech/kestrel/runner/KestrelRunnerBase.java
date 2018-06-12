@@ -195,6 +195,9 @@ public abstract class KestrelRunnerBase extends KAnalyzeRunnable {
 	 */
 	protected double expDecayMin;
 	
+	/** Maximum number of k-mer repeats allowed in a haplotype assembly. */
+	protected int maxRepeatCount;
+	
 	/**
 	 * If <code>true</code>, then allow haplotypes and variants to occur over ambiguous regions.
 	 */
@@ -1357,6 +1360,35 @@ public abstract class KestrelRunnerBase extends KAnalyzeRunnable {
 	 */
 	public double getDecayAlpha() {
 		return expDecayAlpha;
+	}
+	
+	/**
+	 * Set the maximum number of times a k-mers may be repeated in a haplotype assembly before
+	 * giving up. This value should be <code>0</code> for most applications because cycles in the
+	 * k-mer graph lead to unreliable assemblies.
+	 * 
+	 * @param maxRepeatCount Maxmimum k-mer repeat count.
+	 * 
+	 * @throws IllegalArgumentException If <code>repeatCount</code> is negative.
+	 */
+	public void setMaxRepeatCount(int maxRepeatCount)
+			throws IllegalArgumentException {
+		
+		if (maxRepeatCount < 0)
+			throw new IllegalArgumentException("Maximum repeat count must be non-negative: " + maxRepeatCount);
+		
+		this.maxRepeatCount = maxRepeatCount;
+		
+		return;
+	}
+	
+	/**
+	 * Get the maximum number of times k-mers may be repeated in a haplotype assembly.
+	 * 
+	 * @return Maximum k-mer repeat count.
+	 */
+	public int getMaxRepeatCount() {
+		return maxRepeatCount;
 	}
 	
 	/**

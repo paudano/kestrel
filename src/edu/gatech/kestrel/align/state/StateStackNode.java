@@ -17,6 +17,7 @@
 package edu.gatech.kestrel.align.state;
 
 import edu.gatech.kanalyze.util.Base;
+import edu.gatech.kanalyze.util.KmerHashSet;
 import edu.gatech.kestrel.align.MaxAlignmentScoreNode;
 
 /**
@@ -42,6 +43,12 @@ public final class StateStackNode {
 	
 	/** Number of bases in the consensus at this point of the alignment. */
 	public final int consensusSize;
+	
+	/** K-mer hash for cycle detection. */
+	public final KmerHashSet kmerHash;
+	
+	/** Repeat count for cycle detection. */
+	public final int repeatCount;
 	
 	/** A list of nodes in the alignment column. */
 	public final TraceNodeContainer alignContainer;
@@ -96,7 +103,9 @@ public final class StateStackNode {
 			float maxAlignmentScore,
 			MaxAlignmentScoreNode maxAlignmentScoreNode,
 			int minDepth,
-			StateStackNode nextNodeDown) {
+			StateStackNode nextNodeDown,
+			KmerHashSet kmerHash,
+			int repeatCount) {
 		
 		// Check arguments
 		assert (kmer != null) :
@@ -114,6 +123,12 @@ public final class StateStackNode {
 		assert (minDepth > 0) :
 			"StateStackNode(): minDepth is less than 1: " + minDepth;
 		
+		assert (kmerHash != null) :
+			"StateStackNode(): K-mer hash is null";
+		
+		assert (repeatCount >= 0) :
+			"K-mer repeat count is negative: " + repeatCount;
+		
 		// Assign fields
 		this.kmer = kmer;
 		this.nextBase = nextBase;
@@ -126,6 +141,8 @@ public final class StateStackNode {
 		this.minDepth = minDepth;
 		this.nextNodeDown = nextNodeDown;
 		this.nextNodeUp = null;
+		this.kmerHash = kmerHash;
+		this.repeatCount = repeatCount;
 		
 		return;
 	}
@@ -138,6 +155,6 @@ public final class StateStackNode {
 	 * @return A restored state object.
 	 */
 	public RestoredState getRestoredState() {
-		return new RestoredState(kmer, consensusSize, minDepth);
+		return new RestoredState(kmer, consensusSize, minDepth, kmerHash, repeatCount);
 	}
 }

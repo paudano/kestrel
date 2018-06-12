@@ -25,6 +25,7 @@ import edu.gatech.kestrel.activeregion.Haplotype;
 import edu.gatech.kestrel.align.state.RestoredState;
 import edu.gatech.kestrel.counter.CountMap;
 import edu.gatech.kanalyze.util.kmer.KmerUtil;
+import edu.gatech.kanalyze.util.KmerHashSet;
 
 /**
  * Builds consensus sequences for active regions using k-mer evidence to choose bases and
@@ -53,6 +54,9 @@ public class KmerAlignmentBuilder {
 	/** Maximum number of haplotypes that may be accepted. */
 	private int maxHaplotypes;
 	
+	/** Maximum repeat count. */
+	public final int maxRepeatCount;
+	
 	/** Default maximum number of haplotypes. */
 	public static final int DEFAULT_MAX_HAPLOTYPES = 15;
 	
@@ -64,6 +68,8 @@ public class KmerAlignmentBuilder {
 	 * @param alnWeight Alignment weights.
 	 * @param countReverseKmers Count reverse complement k-mers in region statistics if
 	 *   <code>true</code>.
+	 * @param maxRepeatCount Maximum number of times k-mers may be repeated within an assembly
+	 *    before aborting the assembly.
 	 * @param trace If <code>true</code>, record the trace matrix in matrix form. This
 	 *   option will have a significant performance impact, and it should only be used
 	 *   for troubleshooting and debugging.
@@ -71,9 +77,9 @@ public class KmerAlignmentBuilder {
 	 * @throws NullPointerException If <code>kUtil</code>, <code>counter</code>, or
 	 *   <code>alnWeight</code> is <code>null</code>.
 	 * @throws IllegalArgumentException If <code>kUtil.kSize</code> is less than
-	 *   <code>KestrelConstants.MIN_KMER_SIZE</code>.
+	 *   <code>KestrelConstants.MIN_KMER_SIZE</code> or if <code>maxRepeatCount</code> is negative.
 	 */
-	public KmerAlignmentBuilder(KmerUtil kUtil, CountMap counter, AlignmentWeight alnWeight, boolean countReverseKmers, boolean trace)
+	public KmerAlignmentBuilder(KmerUtil kUtil, CountMap counter, AlignmentWeight alnWeight, boolean countReverseKmers, int maxRepeatCount, boolean trace)
 			throws NullPointerException, IllegalArgumentException {
 		
 		logger = LoggerFactory.getLogger(KmerAlignmentBuilder.class);
@@ -88,11 +94,15 @@ public class KmerAlignmentBuilder {
 		if (alnWeight == null)
 			alnWeight = AlignmentWeight.get(null);  // Get default alignment weight
 		
+		if (maxRepeatCount < 0)
+			throw new IllegalArgumentException("Maximum repeat count must be non-negative: " + maxRepeatCount);
+		
 		// Assign fields
 		this.kUtil = kUtil;
 		this.counter = counter;
 		this.alnWeight = alnWeight;
 		this.countReverseKmers = countReverseKmers;
+		this.maxRepeatCount = maxRepeatCount;
 		
 		maxHaplotypes = DEFAULT_MAX_HAPLOTYPES;
 		
@@ -165,6 +175,9 @@ public class KmerAlignmentBuilder {
 		
 		HaplotypeContainer haplotypeList;
 		
+		KmerHashSet kmerHash = new KmerHashSet(kUtil.kSize);  // Hash set for cycle detection
+		int repeatCount = 0;  // Number of repeated k-mers
+		
 		// Init
 		haplotypeList = new HaplotypeContainer(maxHaplotypes);
 		
@@ -176,13 +189,14 @@ public class KmerAlignmentBuilder {
 		
 		if (countReverseKmers)
 			minDepth += counter.get(revKmer);
-		
+				
 		// Iterate until all possible paths from the initial k-mer are explored
 		ITER_LOOP:
 		while (true) {
 			
 			kUtil.revComplement(kmer, revKmer);
 			
+			BASE_LOOP:
 			do {
 				// A
 				kUtil.append(kmer, Base.A);
@@ -213,7 +227,7 @@ public class KmerAlignmentBuilder {
 						if (logger.isTraceEnabled())
 							logger.trace("Align split: Saving state {} (count={}, added=C, saving=this)", kUtil.toBaseString(kmer), baseCount);
 						
-						aligner.saveState(kUtil.copy(kmer, null), Base.C, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount);
+						aligner.saveState(kUtil.copy(kmer, null), Base.C, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount, kmerHash, repeatCount);
 					
 					} else {
 						
@@ -224,7 +238,7 @@ public class KmerAlignmentBuilder {
 							if (logger.isTraceEnabled())
 								logger.trace("Align split: Saving state {} (count={}, added=C, saving=cache)", kUtil.toBaseString(kmerCache), maxCount);
 							
-							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount);
+							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount, kmerHash, repeatCount);
 						}
 						
 						maxCount = baseCount;
@@ -250,7 +264,7 @@ public class KmerAlignmentBuilder {
 						if (logger.isTraceEnabled())
 							logger.trace("Align split: Saving state {} (count={}, added=G, saving=this)", kUtil.toBaseString(kmer), baseCount);
 						
-						aligner.saveState(kUtil.copy(kmer, null), Base.G, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount);
+						aligner.saveState(kUtil.copy(kmer, null), Base.G, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount, kmerHash, repeatCount);
 						
 					} else {
 						
@@ -261,7 +275,7 @@ public class KmerAlignmentBuilder {
 							if (logger.isTraceEnabled())
 								logger.trace("Align split: Saving state {} (count={}, added=G, saving=cache)", kUtil.toBaseString(kmerCache), maxCount);
 							
-							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount);
+							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount, kmerHash, repeatCount);
 						}
 						
 						maxCount = baseCount;
@@ -287,7 +301,7 @@ public class KmerAlignmentBuilder {
 						if (logger.isTraceEnabled())
 							logger.trace("Align split: Saving state {} (count={}, added=T, saving=this)", kUtil.toBaseString(kmer), baseCount);
 						
-						aligner.saveState(kUtil.copy(kmer, null), Base.T, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount);
+						aligner.saveState(kUtil.copy(kmer, null), Base.T, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount, kmerHash, repeatCount);
 					
 					} else {
 						
@@ -298,7 +312,7 @@ public class KmerAlignmentBuilder {
 							if (logger.isTraceEnabled())
 								logger.trace("Align split: Saving state {} (count={}, added=T, saving=cache)", kUtil.toBaseString(kmerCache), maxCount);
 							
-							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount);
+							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount, kmerHash, repeatCount);
 						}
 						
 						maxCount = baseCount;
@@ -315,11 +329,24 @@ public class KmerAlignmentBuilder {
 				kmer[lastKmerWord] = kmer[lastKmerWord] & lastWordMask | base.intVal;
 				revKmer[0] = revKmer[0] & mswMask | revBase;
 				
+				// Cycle detection
+				if (! kmerHash.add(kmer)) {
+					++repeatCount;
+					
+					if (repeatCount > maxRepeatCount) {
+						logger.trace("Cycle detected: {} (repeated k-mers = {}): Breaking forward assembly", kUtil.toBaseString(kmer), repeatCount);
+						
+						break BASE_LOOP;
+					}
+				}
+				
+				// Update depth
 				if (maxCount < minDepth)
 					minDepth = maxCount;
 				
 			} while (aligner.addBase(base));
 			
+			// Add haplotypes
 			if (minDepth > 0) {
 				for (Haplotype haplotype : aligner.getHaplotypes(counter, countReverseKmers)) {
 					logger.trace("Adding haplotype: {}", haplotype);
@@ -335,6 +362,9 @@ public class KmerAlignmentBuilder {
 			
 			kmer = restoredState.kmer;
 			minDepth = restoredState.minDepth;
+			
+			kmerHash = restoredState.kmerHash;
+			repeatCount = restoredState.repeatCount;
 		}
 		
 		logger.trace("Built {} haplotypes (fwd): {}", haplotypeList.size(), activeRegion.toString());
@@ -441,6 +471,9 @@ public class KmerAlignmentBuilder {
 		
 		HaplotypeContainer haplotypeList;
 		
+		KmerHashSet kmerHash = new KmerHashSet(kUtil.kSize);  // Hash set for cycle detection
+		int repeatCount = 0;  // Number of repeated k-mers
+		
 		// Init
 		haplotypeList = new HaplotypeContainer(maxHaplotypes);
 		
@@ -459,6 +492,7 @@ public class KmerAlignmentBuilder {
 			
 			kUtil.revComplement(kmer, revKmer);
 			
+			BASE_LOOP:
 			do {
 				// A
 				kUtil.prepend(kmer, Base.A);
@@ -489,7 +523,7 @@ public class KmerAlignmentBuilder {
 						if (logger.isTraceEnabled())
 							logger.trace("Align split: Saving state {} (count={}, added=C, saving=this)", kUtil.toBaseString(kmer), baseCount);
 						
-						aligner.saveState(kUtil.copy(kmer, null), Base.C, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount);
+						aligner.saveState(kUtil.copy(kmer, null), Base.C, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount, kmerHash, repeatCount);
 					
 					} else {
 						
@@ -500,7 +534,7 @@ public class KmerAlignmentBuilder {
 							if (logger.isTraceEnabled())
 								logger.trace("Align split: Saving state {} (count={}, added=C, saving=cache)", kUtil.toBaseString(kmerCache), maxCount);
 							
-							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount);
+							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount, kmerHash, repeatCount);
 						}
 						
 						maxCount = baseCount;
@@ -526,7 +560,7 @@ public class KmerAlignmentBuilder {
 						if (logger.isTraceEnabled())
 							logger.trace("Align split: Saving state {} (count={}, added=G, saving=this)", kUtil.toBaseString(kmer), baseCount);
 						
-						aligner.saveState(kUtil.copy(kmer, null), Base.G, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount);
+						aligner.saveState(kUtil.copy(kmer, null), Base.G, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount, kmerHash, repeatCount);
 						
 					} else {
 						
@@ -537,7 +571,7 @@ public class KmerAlignmentBuilder {
 							if (logger.isTraceEnabled())
 								logger.trace("Align split: Saving state {} (count={}, added=G, saving=cache)", kUtil.toBaseString(kmerCache), maxCount);
 							
-							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount);
+							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount, kmerHash, repeatCount);
 						}
 						
 						maxCount = baseCount;
@@ -563,7 +597,7 @@ public class KmerAlignmentBuilder {
 						if (logger.isTraceEnabled())
 							logger.trace("Align split: Saving state {} (count={}, added=T, saving=this)", kUtil.toBaseString(kmer), baseCount);
 						
-						aligner.saveState(kUtil.copy(kmer, null), Base.T, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount);
+						aligner.saveState(kUtil.copy(kmer, null), Base.T, (baseCount > minDepth && minDepth > 0) ? minDepth : baseCount, kmerHash, repeatCount);
 					
 					} else {
 						
@@ -574,7 +608,7 @@ public class KmerAlignmentBuilder {
 							if (logger.isTraceEnabled())
 								logger.trace("Align split: Saving state {} (count={}, added=T, saving=cache)", kUtil.toBaseString(kmerCache), maxCount);
 							
-							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount);
+							aligner.saveState(kmerCache, base, (maxCount > minDepth && minDepth > 0) ? minDepth : maxCount, kmerHash, repeatCount);
 						}
 						
 						maxCount = baseCount;
@@ -590,6 +624,17 @@ public class KmerAlignmentBuilder {
 				// Replace max base
 				kmer[0] = kmer[0] & mswMask | (base.intVal << kUtil.mswMaskFirstShift);
 				revKmer[lastKmerWord] = revKmer[lastKmerWord] & lastWordMask | revBase;
+				
+				// Cycle detection
+				if (! kmerHash.add(kmer)) {
+					++repeatCount;
+					
+					if (repeatCount > maxRepeatCount) {
+						logger.trace("Cycle detected: {}: Breaking reverse assembly");
+						
+						break BASE_LOOP;
+					}
+				}
 				
 			} while (aligner.addBase(base));
 			

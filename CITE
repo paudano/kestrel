@@ -1,0 +1,19 @@
+Please cite the 2018 article published in Bioinformatics (OUP):
+
+Audano, P. A., Ravishankar, S., & Vannberg, F. O. (2018). Mapping-free variant calling using haplotype reconstruction from k-mer frequencies. Bioinformatics, 34(10). https://doi.org/10.1093/bioinformatics/btx753
+
+
+For BibTeX users:
+
+@article{Audano2018,
+abstract = {{\textcopyright} The Author(s) 2017. Motivation The standard protocol for detecting variation in DNA is to map millions of short sequence reads to a known reference and find loci that differ. While this approach works well, it cannot be applied where the sample contains dense variants or is too distant from known references. De novo assembly or hybrid methods can recover genomic variation, but the cost of computation is often much higher. We developed a novel k-mer algorithm and software implementation, Kestrel, capable of characterizing densely packed SNPs and large indels without mapping, assembly or de Bruijn graphs. Results When applied to mosaic penicillin binding protein (PBP) genes in Streptococcus pneumoniae, we found near perfect concordance with assembled contigs at a fraction of the CPU time. Multilocus sequence typing (MLST) with this approach was able to bypass de novo assemblies. Kestrel has a very low false-positive rate when applied to the whole genome, and while Kestrel identified many variants missed by other methods, limitations of a purely k-mer based approach affect overall sensitivity. Availability and implementation Source code and documentation for a Java implementation of Kestrel can be found at https://github.com/paudano/kestrel. All test code for this publication is located at https://github.com/paudano/kescases.},
+author = {Audano, P.A. and Ravishankar, S. and Vannberg, F.O.},
+doi = {10.1093/bioinformatics/btx753},
+issn = {14602059},
+journal = {Bioinformatics},
+number = {10},
+title = {{Mapping-free variant calling using haplotype reconstruction from k-mer frequencies}},
+volume = {34},
+year = {2018}
+}
+

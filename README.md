@@ -3,7 +3,8 @@ Mapping-free variant caller for short-read Illumina data
 
 Kestrel is a variant-caller for short-read Illumina data. It does not align sequence reads or perform a de novo assembly. Instead, it breaks reads into k-mers, which are short overlapping fragments of uniform length, and it counts the number of occurences of each unique k-mer in the sequence data. It also finds the ordered k-mers of a reference. With these two k-mer sets, Kestrel searches for patterns of variation. By using a novel local assembly method guided by the reference, it builds one or more sequences over the altered region and call variants from its alignment.
 
-This work has been submitted to bioRxiv (BIORXIV/2017/153619) and Oxford Bioinformatics (BIOINF-2017-1097) and has not yet been peer-reviewed.
+This work has been published in Oxford Bioinformatics:
+Audano, P. A., Ravishankar, S., & Vannberg, F. O. (2018). Mapping-free variant calling using haplotype reconstruction from k-mer frequencies. Bioinformatics, 34(10), 1659–1665. https://doi.org/10.1093/bioinformatics/btx753
 
 Check out releases for the latest version of Kestrel. The software can be run with the `kestrel` script or with `java -Xmx4G -jar kestrel.jar`. Use the `--help` (or `-h`) option for a list of available parameters.
 

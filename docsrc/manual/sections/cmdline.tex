@@ -36,7 +36,7 @@ This allocates 4 GB of RAM (-Xmx4G).
 
 If memory does not need to be tuned, the `kestrel` script may be run.
 
-Do not separate `kestrel.jar` from the other JAR files. They must be in the same directory or Kestrel will not be able to find libraries it depends on, such as KAnalyze. You may create a symbolic link to `kestrel.jar` or `kestrel` from any directory and the JAR file will resolve relative to its own location.
+Do not separate `kestrel.jar` from the other JAR files. They must be in the same directory or Kestrel will not be able to find libraries it depends on, such as KAnalyze. You may create a symbolic link to `kestrel` from any directory.
 
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -62,6 +62,7 @@ Do not separate `kestrel.jar` from the other JAR files. They must be in the same
 %%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Command options}
 \label{sec.cmdline.opts}
+
 
 \subsubsection{Getting Help}
 \label{sec.cmdline.opts.help}
@@ -155,8 +156,8 @@ Do not separate `kestrel.jar` from the other JAR files. They must be in the same
 		
 		% Files per sample
 		\lopt{filespersample} & N &
-		Automatically divide input files into discrete samples by the number of samples. This may be useful for loading many samples by listing them on the command-line. For example, to load paired-end reads in multiple samples, set this value to ``2''. Note that Kestrel does not associate files by their name, so related files must be grouped together in the order they are listed. By default, Kestrel loads all files as a single sample.
-		& $\infty$
+		Automatically divide input files into discrete samples by the number of samples. This may be useful for loading many samples by listing them on the command-line. For example, to load paired-end reads in multiple samples, set this value to ``2''. Note that Kestrel does not associate files by their name, so related files must be grouped together in the order they are listed. The default, $0$, loads all files as a single sample.
+		& 0
 		\\ \hline
 		
 		% Sample set
@@ -209,7 +210,7 @@ Do not separate `kestrel.jar` from the other JAR files. They must be in the same
 		
 		% Temp file location
 		\lopt{temploc} & DIR &
-		Name of the directory where KAnalyze stores temporary files.
+		Name of the directory where KAnalyze stores temporary files when processing sequence data for Kestrel.
 		& \parbox{2cm}{Current\\directory}
 		\\ \hline
 		
@@ -263,7 +264,7 @@ Do not separate `kestrel.jar` from the other JAR files. They must be in the same
 		
 		% No count reverse k-mers
 		\lopt{nocountrev} & &
-		Do not include the reverse complement of k-mers in read depth estimates. If all sequence reads are in the same orientation as the reference, then this option should be used.
+		Do not include the reverse complement of k-mers in read depth estimates. Only k-mers in reference orientation will be used.
 		&
 		\\ \hline
 		
@@ -358,7 +359,7 @@ Do not separate `kestrel.jar` from the other JAR files. They must be in the same
 		
 		% Scan limit factor		
 		\lopt{scanlimitfactor} & FACTOR &
-		Set a limit on how long an active region may be. This is computed by multiplying the k-mer size by this factor and adding the maximum length of a gap. The computed limit will be adjusted so that active regions are at least large enough to capture a SNP in cases where the maximum gap length is 0. Setting this to a low value or \"min\" will set the limit so that it is just large enough to catch SNPs and deletions, but it will miss large deletions if another variant is within the k-mer size window. Setting this to a high value or "\"max\" lifts the restrictions on active region lengths, and this may cause the program to take an excessive amount of time and memory trying to solve arbitrarily long active regions.
+		Set a limit on how long an active region may be. This is computed by multiplying the k-mer size by this factor and adding the maximum length of a gap. The computed limit will be adjusted so that active regions are at least large enough to capture a SNP in cases where the maximum gap length is 0. Setting this to a low value or ``min'' will set the limit so that it is just large enough to catch SNPs and deletions, but it will miss large deletions if another variant is within the k-mer size window. Setting this to a high value or ``max'' lifts the restrictions on active region lengths, and this may cause the program to take an excessive amount of time and memory trying to solve arbitrarily long active regions.
 		& 5.0
 		\\ \hline
 		
@@ -431,7 +432,12 @@ Do not separate `kestrel.jar` from the other JAR files. They must be in the same
 		Set the maximum number of haplotypes for an active region. Alignments can generate more than one haplotype, and with noisy sequence data or paralogues, many haplotypes may be found. This options limits the amount of memory that can be consumed in these cases.
 		& 15
 		\\ \hline
-
+		
+		% Maximum repeat count
+		\lopt{maxrepeat} & COUNT &
+		Set the maximum number of times k-mers may be repeated in active region construction. Repeated k-mers are cycles in the k-mer graph, and an assembly cannot proceed through such cycles unambiguously. The default value (0) is correct for most applications, but it may be increased to attempt assemblies through repetitive sequence. If this value is set above 0, then care must be taken when analyzing the output.
+		& 0
+		\\ \hline
 
 	\end{longtable}
 \end{small}

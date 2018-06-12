@@ -161,6 +161,7 @@ public class KestrelArgumentParser extends ArgumentParser {
 		addSpecification(new OptLogStdout());
 		addSpecification(new OptMaxAlignStates());
 		addSpecification(new OptMaxHaplotypeStates());
+		addSpecification(new OptMaxRepeatCount());
 		addSpecification(new OptMinimizerMask());
 		addSpecification(new OptMinimizerSize());
 		addSpecification(new OptMinKmerCount());
@@ -195,6 +196,7 @@ public class KestrelArgumentParser extends ArgumentParser {
 		addHelpTopic(new HelpFormat());
 		addHelpTopic(new HelpReader());
 		addHelpTopic(new HelpCite());
+		addHelpTopic(new HelpBib());
 		addHelpTopic(new HelpRefReader());
 		
 		return;
@@ -2707,6 +2709,64 @@ public class KestrelArgumentParser extends ArgumentParser {
 	}
 	
 	/**
+	 * Option: Set maximum alignment states
+	 */
+	protected class OptMaxRepeatCount extends OptionSpecElement {
+		
+		/**
+		 * Create option.
+		 */
+		public OptMaxRepeatCount() {
+			super('\0', "maxrepeat",
+					OptionArgumentType.REQUIRED,
+					"COUNT", "" + ActiveRegionDetector.DEFAULT_MAX_REPEAT_COUNT,
+					"Cycles in the k-mer graph produce unreliable local assemblies. The default value for " +
+					"this option (0) will terminate any local assembly that contains the same k-mer more " +
+					"than once. For most applications, 0 is the recommended value. To attempt assemblies in " +
+					"reptitive regions, this value can be increased, but the results may be variant calls on " +
+					"haplotypes that do not exist in the sequence data."
+			);
+		}
+		
+		/**
+		 * Invoke this option
+		 * 
+		 * @param option Option.
+		 * @param argument Option argument.
+		 */
+		@Override
+		public boolean invoke(String option, String argument) {
+			
+			int maxRepeatCount;
+			
+			try {
+				maxRepeatCount = StringUtil.toInt(argument, false);
+				
+				if (maxRepeatCount < 0) {
+					error("Error setting maximum repeat count (" + option + "): Number is negative: " + maxRepeatCount, KAnalyzeConstants.ERR_USAGE);
+					return false;
+				}
+				
+				runnerBase.setMaxRepeatCount(maxRepeatCount);
+				
+			} catch (NumberFormatException ex) {
+				error("Error setting maximum repeat count (" + option + "): " + ex.getMessage(), KAnalyzeConstants.ERR_USAGE);
+				return false;
+			}
+			
+			return true;
+		}
+		
+		/**
+		 * Initialize this option.
+		 */
+		@Override
+		public void init() {
+			runnerBase.setMaxRepeatCount(ActiveRegionDetector.DEFAULT_MAX_REPEAT_COUNT);
+		}
+	}
+	
+	/**
 	 * Option: Remove reference sequence descriptions
 	 */
 	protected class OptRemoveRefDescription extends OptionSpecElement {
@@ -3158,8 +3218,34 @@ public class KestrelArgumentParser extends ArgumentParser {
 		 */
 		public HelpCite() {
 			super("cite", "Cite Kestrel",
-					"Kestrel is in the process of being developed and published. There is currently no " +
-					"citation information."
+					"Audano, P. A., Ravishankar, S., & Vannberg, F. O. (2017). Mapping-free variant calling using haplotype reconstruction from k-mer frequencies. Bioinformatics, (April), 1–7. https://doi.org/10.1093/bioinformatics/btx753"
+			);
+			
+			return;
+		}
+	}
+	
+	/**
+	 * Help topic: Cite Kestrel
+	 */
+	protected class HelpBib extends HelpTopicElement {
+		
+		/**
+		 * Create help topic.
+		 */
+		public HelpBib() {
+			super("citebib", "Cite Kestrel (BibTeX)",
+					"@article{Audano2018,\n" +
+					"abstract = {{\\textcopyright} The Author(s) 2017. Motivation The standard protocol for detecting variation in DNA is to map millions of short sequence reads to a known reference and find loci that differ. While this approach works well, it cannot be applied where the sample contains dense variants or is too distant from known references. De novo assembly or hybrid methods can recover genomic variation, but the cost of computation is often much higher. We developed a novel k-mer algorithm and software implementation, Kestrel, capable of characterizing densely packed SNPs and large indels without mapping, assembly or de Bruijn graphs. Results When applied to mosaic penicillin binding protein (PBP) genes in Streptococcus pneumoniae, we found near perfect concordance with assembled contigs at a fraction of the CPU time. Multilocus sequence typing (MLST) with this approach was able to bypass de novo assemblies. Kestrel has a very low false-positive rate when applied to the whole genome, and while Kestrel identified many variants missed by other methods, limitations of a purely k-mer based approach affect overall sensitivity. Availability and implementation Source code and documentation for a Java implementation of Kestrel can be found at https://github.com/paudano/kestrel. All test code for this publication is located at https://github.com/paudano/kescases.},\n" +
+					"author = {Audano, P.A. and Ravishankar, S. and Vannberg, F.O.},\n" +
+					"doi = {10.1093/bioinformatics/btx753},\n" +
+					"issn = {14602059},\n" +
+					"journal = {Bioinformatics},\n" +
+					"number = {10},\n" +
+					"title = {{Mapping-free variant calling using haplotype reconstruction from k-mer frequencies}},\n" +
+					"volume = {34},\n" +
+					"year = {2018}\n" +
+					"}"
 			);
 			
 			return;

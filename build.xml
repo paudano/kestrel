@@ -272,6 +272,7 @@
 				<include name="COPYING"/>
 				<include name="COPYING.LESSER"/>
 				<include name="COPYING.DOC"/>
+				<include name="CITE"/>
 				<include name="ReleaseNotes"/>
 			</tarfileset>
 			

@@ -221,6 +221,9 @@ public class ActiveRegionDetector {
 	/** Exponential decay lambda. */
 	private double expDecayLambda;
 	
+	/** Maximum number of repeated k-mers in a haplotype assembly. */
+	private int maxRepeatCount;
+	
 	/** Alignment weights. */
 	private AlignmentWeight alignmentWeight;
 	
@@ -274,7 +277,7 @@ public class ActiveRegionDetector {
 	public static final int DEFAULT_PEAK_SCAN_LENGTH = 7;
 	
 	/** Default end-scan limit factor. */
-	public static final double DEFAULT_SCAN_LIMIT_FACTOR = 5.0;
+	public static final double DEFAULT_SCAN_LIMIT_FACTOR = 7.0;
 	
 	/** Default alignment trace attribute. */
 	public static final boolean DEFAULT_TRACE_HAPLOTYPE_ALIGNMENT = false;
@@ -284,6 +287,9 @@ public class ActiveRegionDetector {
 	
 	/** Default exponential decay alpha. */
 	public static final double DEFAULT_EXP_ALPHA = 0.80;
+	
+	/** Default number of times k-mers may be repeated in an assembly. */
+	public static final int DEFAULT_MAX_REPEAT_COUNT = 0;
 	
 	/** Default value for right anchor recovery. */
 	public static final boolean DEFAULT_RECOVER_RIGHT_ANCHOR = true;
@@ -318,6 +324,7 @@ public class ActiveRegionDetector {
 		setAnchorBothEnds(DEFAULT_ANCHOR_BOTH_ENDS);
 		setCallAmbiguousRegions(DEFAULT_CALL_AMBIGUOUS_REGIONS);
 		setRecoverRightAnchor(DEFAULT_RECOVER_RIGHT_ANCHOR);
+		setMaxRepeatCount(DEFAULT_MAX_REPEAT_COUNT);
 		
 		setPeakScanLength(DEFAULT_PEAK_SCAN_LENGTH);
 		setDecayMinimum(DEFAULT_EXP_MIN);
@@ -1264,6 +1271,38 @@ public class ActiveRegionDetector {
 	}
 	
 	/**
+	 * Set the maximum number of times a k-mers may be repeated in a haplotype assembly before
+	 * giving up. This value should be <code>0</code> for most applications because cycles in the
+	 * k-mer graph lead to unreliable assemblies.
+	 * 
+	 * @param maxRepeatCount Maxmimum k-mer repeat count.
+	 * 
+	 * @throws IllegalArgumentException If <code>repeatCount</code> is negative.
+	 */
+	public void setMaxRepeatCount(int maxRepeatCount)
+			throws IllegalArgumentException {
+		
+		if (maxRepeatCount < 0)
+			throw new IllegalArgumentException("Maximum repeat count must be non-negative: " + maxRepeatCount);
+		
+		this.maxRepeatCount = maxRepeatCount;
+		
+		// Re-instantiate alignment builder
+		initAlignmentBuilder();
+		
+		return;
+	}
+	
+	/**
+	 * Get the maximum number of times k-mers may be repeated in a haplotype assembly.
+	 * 
+	 * @return Maximum k-mer repeat count.
+	 */
+	public int getMaxRepeatCount() {
+		return maxRepeatCount;
+	}
+	
+	/**
 	 * If set to <code>true</code>, allow active regions to include ambiguous bases.
 	 * 
 	 * @param callAmbiguousRegions Allow ambiguous bases in active regions if
@@ -1751,10 +1790,11 @@ public class ActiveRegionDetector {
 	
 	/**
 	 * Initialize the alignment builder. This must be called whenever <code>alignmentWeight</code>,
-	 * <code>countReverseKmers</code>, or <code>traceHaplotypeAlignment</code> in changed.
+	 * <code>countReverseKmers</code>, <code>traceHaplotypeAlignment</code>, or
+	 * <code>maxRepeatCount</code> is changed.
 	 */
 	private void initAlignmentBuilder() {
-		alignmentBuilder = new KmerAlignmentBuilder(kUtil, counter, alignmentWeight, countReverseKmers, traceHaplotypeAlignment);
+		alignmentBuilder = new KmerAlignmentBuilder(kUtil, counter, alignmentWeight, countReverseKmers, maxRepeatCount, traceHaplotypeAlignment);
 		
 		return;
 	}
