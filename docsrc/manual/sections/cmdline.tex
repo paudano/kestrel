@@ -50,10 +50,10 @@ Do not separate `kestrel.jar` from the other JAR files. They must be in the same
 \subsubsection{Example Usage}
 \label{sec.cmdline.count.egusage}
 
-\texttt{java -jar kestrel.jar count -r ref.fasta sample\_1.fastq sample\_2.fastq}\\
+\texttt{java -jar kestrel.jar -r ref.fasta sample\_1.fastq sample\_2.fastq}\\
 \hspace*{1cm}Reads reference sequences from ref.fasta and calls variants from the two FASTQ files as one sample.
 
-\texttt{java -jar kestrel.jar count -r ref.fasta -i regions.bed sample\_1.fastq sample\_2.fastq}\\
+\texttt{java -jar kestrel.jar -r ref.fasta -i regions.bed sample\_1.fastq sample\_2.fastq}\\
 \hspace*{1cm}Reads reference sequences from ref.fasta, extracts regions from the reference sequences in regions.bed, and calls variants from the two FASTQ files as one sample.
 
 
